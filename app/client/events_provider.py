@@ -27,13 +27,14 @@ class EventsProviderClient:
         self, method: str, url: str, params: dict = None, json: dict = None
     ) -> dict:
         try:
-            async with httpx.AsyncClient(follow_redirects=True) as client:
+            async with httpx.AsyncClient(
+                follow_redirects=True, headers={"x-api-key": self.api_key}
+            ) as client:
                 response = await client.request(
                     method,
                     url=url,
                     params=params,
                     json=json,
-                    headers={"x-api-key": self.api_key},
                 )
                 if response.status_code >= 300:
                     raise HTTPException(
