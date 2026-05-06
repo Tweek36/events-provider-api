@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from app.api import sync, events, tickets
 from cashews import cache
 from app.config.logging import ProblematicRequestLoggingMiddleware, configure_logging
@@ -22,6 +24,14 @@ app.add_middleware(ProblematicRequestLoggingMiddleware)
 app.include_router(sync.router)
 app.include_router(events.router)
 app.include_router(tickets.router)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": exc.errors()},
+    )
 
 
 @app.get("/api/health")
