@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/tickets", tags=["tickets"])
 logger = structlog.get_logger()
 
 
-@router.post("")
+@router.post("", status_code=201)
 async def register(
     body: TicketsRequestBody,
     session: AsyncSession = Depends(get_session),

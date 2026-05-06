@@ -81,5 +81,6 @@ class Ticket(Base):
     event_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey("events.id", ondelete="CASCADE"), index=True
     )
+    seat: Mapped[str] = mapped_column(String)
 
     event: Mapped["Event"] = relationship(back_populates="tickets")

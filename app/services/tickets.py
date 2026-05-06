@@ -30,7 +30,7 @@ class TicketsService:
 
     async def register(self, body: TicketsRequestBody):
         event = await self.event_repository.get_by_id(
-            body.event_id, selectin=[Event.place]
+            body.event_id, selectin=[Event.place, Event.tickets]
         )
         if not event or event.status != "published":
             raise HTTPException(status_code=404, detail="Event not found")
@@ -40,6 +40,8 @@ class TicketsService:
             )
         if not self._is_seat_available(body.seat, event.place.seats_pattern):
             raise HTTPException(status_code=400, detail="Seat is not available")
+        if event.tickets and any(t.seat == body.seat for t in event.tickets):
+            raise HTTPException(status_code=400, detail="Seat is already taken")
         return await self.events_provider_client.register(
             event_id=body.event_id, body=RegisterRequest(**body.model_dump())
         )
@@ -52,6 +54,8 @@ class TicketsService:
             raise HTTPException(status_code=404, detail="Ticket not found")
         if ticket.event.event_time >= datetime.datetime.now(datetime.UTC):
             raise HTTPException(status_code=400, detail="Event has already occurred")
-        return await self.events_provider_client.unregister(
+        response = await self.events_provider_client.unregister(
             event_id=ticket.event_id, body=UnregisterRequest(ticket_id=ticket_id)
         )
+        await self.ticket_repository.delete(ticket_id) 
+        return response
