@@ -9,7 +9,6 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 from dotenv import load_dotenv
 
-
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from app.models import Base
@@ -20,8 +19,8 @@ fileConfig(config.config_file_name)
 load_dotenv()
 
 database_url = os.getenv(
-    "DATABASE_URL",
-    None,
+    "POSTGRES_CONNECTION_STRING",
+    "postgresql+asyncpg://postgres:admin@localhost:5433/events_db",
 )
 
 print(f"Using database URL: {database_url}")
