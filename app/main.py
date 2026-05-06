@@ -9,7 +9,7 @@ configure_logging(log_level="INFO", log_file="logs/app.log")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    cache.setup("memory://")
+    cache.setup("mem://")
     await cache.init()
     yield
     await cache.close()
