@@ -1,6 +1,6 @@
 from datetime import datetime
 import uuid
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 
 class Place(BaseModel):
@@ -9,8 +9,7 @@ class Place(BaseModel):
     city: str = Field(..., description="Город, в котором находится место")
     address: str = Field(..., description="Адрес места")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Event(BaseModel):
@@ -31,8 +30,7 @@ class Event(BaseModel):
         ..., description="Количество посетителей, зарегистрированных на событие"
     )
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EventsResponse(BaseModel):

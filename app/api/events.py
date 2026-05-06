@@ -31,7 +31,7 @@ async def get_event(
 
 
 @router.get("/{event_id}/seats")
-# @cache(ttl="30s", key="event_seats:{event_id}")
+@cache(ttl="30s", key="event_seats:{event_id}")
 async def get_event_seats(
     event_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
