@@ -6,7 +6,7 @@ from app.repositories.event import EventRepository
 from app.repositories.metadata import MetadataRepository
 from app.repositories.place import PlaceRepository
 from app.schemes.client import Metadata
-from app.settings import X_API_KEY, EVENTS_PROVIDER_API_URL
+from app.settings import settings
 from app.types import SyncStatusType
 
 logger = structlog.get_logger()
@@ -16,7 +16,7 @@ class SyncService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.events_provider_client = EventsProviderClient(
-            EVENTS_PROVIDER_API_URL, X_API_KEY
+            settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY
         )
         self.metadata_repository = MetadataRepository(session)
         self.event_repository = EventRepository(session)

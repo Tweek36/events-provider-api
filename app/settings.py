@@ -11,9 +11,3 @@ class Settings(BaseSettings):
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 settings = Settings()
-
-DATABASE_URL = settings.DATABASE_URL
-REDIS_URL = settings.REDIS_URL
-EVENTS_PROVIDER_API_URL = settings.EVENTS_PROVIDER_API_URL
-X_API_KEY = settings.X_API_KEY
-HOSTNAME = settings.HOSTNAME

@@ -8,14 +8,14 @@ from app.repositories.event import EventRepository
 from app.repositories.ticket import TicketRepository
 from app.schemes.client import RegisterRequest, UnregisterRequest
 from app.schemes.tickets import TicketsRequestBody
-from app.settings import EVENTS_PROVIDER_API_URL, X_API_KEY
+from app.settings import settings
 
 
 class TicketsService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.events_provider_client = EventsProviderClient(
-            EVENTS_PROVIDER_API_URL, X_API_KEY
+            settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY
         )
         self.ticket_repository = TicketRepository(session)
         self.event_repository = EventRepository(session)

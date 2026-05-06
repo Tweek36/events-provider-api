@@ -4,7 +4,7 @@ from app.client.events_provider import EventsProviderClient
 from app.models import Event
 from app.repositories.event import EventRepository
 from datetime import datetime
-from app.settings import X_API_KEY, EVENTS_PROVIDER_API_URL, HOSTNAME
+from app.settings import settings
 from app.schemes.events import EventResponse, EventSeatsResponse, EventsResponse
 import uuid
 
@@ -14,9 +14,9 @@ class EventsService:
         self.session = session
         self.event_repository = EventRepository(session)
         self.events_provider_client = EventsProviderClient(
-            EVENTS_PROVIDER_API_URL, X_API_KEY
+            settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY
         )
-        self.hostname = HOSTNAME
+        self.settings.hostname = settings.HOSTNAME
 
     async def events(self, date_from: str, page: int, page_size: int):
         count = (
@@ -33,12 +33,12 @@ class EventsService:
         return EventsResponse(
             count=count,
             next=(
-                f"http://{self.hostname}/events?date_from={date_from}&page={page + 1}&page_size={page_size}"
+                f"http://{self.settings.hostname}/events?date_from={date_from}&page={page + 1}&page_size={page_size}"
                 if page * page_size < count * page_size
                 else None
             ),
             previous=(
-                f"http://{self.hostname}/events?date_from={date_from}&page={page - 1}&page_size={page_size}"
+                f"http://{self.settings.hostname}/events?date_from={date_from}&page={page - 1}&page_size={page_size}"
                 if page > 1
                 else None
             ),

@@ -1,6 +1,6 @@
 from datetime import datetime
 import uuid
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl
+from pydantic import BaseModel, EmailStr, Field, HttpUrl
 from app.types import SyncStatusType
 
 
@@ -21,7 +21,8 @@ class Place(BaseModel):
         pattern=r"^[A-Z]\d+-\d+(,[A-Z]\d+-\d+)*$",
     )
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
 
 
 class Event(BaseModel):
@@ -52,7 +53,8 @@ class Event(BaseModel):
         description="Дата и время последнего изменения статуса события в формате ISO 8601",
     )
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
 
 
 class EventsResponse(BaseModel):
@@ -64,7 +66,8 @@ class EventsResponse(BaseModel):
     )
     results: list[Event] = Field(..., description="Список событий")
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
 
 
 class SeatsResponse(BaseModel):
@@ -73,7 +76,8 @@ class SeatsResponse(BaseModel):
         description="Список доступных мест в формате '\{секция\}\{номер\}', например 'A1', 'B15' и т.д.",
     )
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
 
 
 class RegisterRequest(BaseModel):
@@ -86,7 +90,8 @@ class RegisterRequest(BaseModel):
     )
     email: EmailStr = Field(..., description="Электронная почта посетителя")
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
 
 
 class RegisterResponse(BaseModel):
@@ -94,7 +99,8 @@ class RegisterResponse(BaseModel):
         ..., description="Уникальный идентификатор зарегистрированного билета"
     )
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
 
 
 class UnregisterRequest(BaseModel):
@@ -102,13 +108,15 @@ class UnregisterRequest(BaseModel):
         ..., description="Уникальный идентификатор зарегистрированного билета"
     )
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
 
 
 class UnregisterResponse(BaseModel):
     success: bool = Field(..., description="Статус успешности отмены регистрации")
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
 
 
 class Metadata(BaseModel):
@@ -124,4 +132,5 @@ class Metadata(BaseModel):
         description="Статус синхронизации данных, например 'unsynced', 'syncing', 'synced'",
     )
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True

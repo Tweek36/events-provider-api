@@ -1,11 +1,11 @@
 from celery import Celery
 from celery.schedules import crontab
 import requests
-from app.settings import REDIS_URL, HOSTNAME
+from app.settings import settings
 
 celery_app = Celery(
     "worker",
-    broker=REDIS_URL,
+    broker=settings.REDIS_URL,
 )
 
 celery_app.conf.beat_schedule = {
@@ -18,7 +18,7 @@ celery_app.conf.beat_schedule = {
 @celery_app.task
 def daily_sync():
     try:
-        response = requests.get(f"http://{HOSTNAME}/api/sync/trigger")
+        response = requests.get(f"http://{settings.HOSTNAME}/api/sync/trigger")
         print(f"Sync status: {response.status_code}")
         return response.json()
     except Exception as e:

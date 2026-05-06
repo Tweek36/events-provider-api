@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from app.api import sync, events, tickets
 from cashews import cache
 from app.config.logging import ProblematicRequestLoggingMiddleware, configure_logging
-from app.settings import REDIS_URL
+from app.settings import settings
 from contextlib import asynccontextmanager
 
-cache.setup(REDIS_URL, prefix="my_app")
+cache.setup(settings.REDIS_URL, prefix="my_app")
 configure_logging(log_level="INFO", log_file="logs/app.log")
 
 
