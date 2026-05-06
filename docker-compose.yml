@@ -44,17 +44,5 @@ services:
     environment:
       - HOSTNAME=web
 
-  alembic:
-    build:
-      context: .
-      dockerfile: Dockerfile.alembic
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-    profiles:
-      - migration
-
 volumes:
   db_data: {}

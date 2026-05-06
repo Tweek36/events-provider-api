@@ -21,5 +21,8 @@ RUN python -m venv /app/.venv && \
 # Copy application code and start script
 COPY --chown=appuser:appuser . .
 
-# Run the application directly with uvicorn
-CMD ["/app/.venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Make the start script executable
+RUN chmod +x /app/start.sh
+
+# Run the start script (waits for DB, runs migrations, then starts server)
+CMD ["/app/start.sh"]
