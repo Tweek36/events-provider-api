@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from app.api import sync, events, tickets
 from cashews import cache
 from app.config.logging import ProblematicRequestLoggingMiddleware, configure_logging
-from app.settings import settings
 from contextlib import asynccontextmanager
 
 configure_logging(log_level="INFO", log_file="logs/app.log")
