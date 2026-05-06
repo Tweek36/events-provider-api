@@ -52,7 +52,7 @@ class TicketsService:
                 "seat": body.seat,
             }
         )
-        return
+        return response
 
     async def unregister(self, ticket_id: uuid.UUID):
         ticket = await self.ticket_repository.get_by_id(
