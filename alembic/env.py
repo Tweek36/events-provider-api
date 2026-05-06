@@ -18,10 +18,12 @@ config = context.config
 fileConfig(config.config_file_name)
 load_dotenv()
 
-database_url = os.getenv(
-    "POSTGRES_CONNECTION_STRING",
-    "postgresql+asyncpg://postgres:admin@localhost:5433/events_db",
-)
+POSTGRES_DATABASE_NAME = os.getenv("POSTGRES_DATABASE_NAME", "events_db")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5433")
+POSTGRES_USERNAME = os.getenv("POSTGRES_USERNAME", "postgres")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "admin")
+database_url = f"postgresql+asyncpg://{POSTGRES_USERNAME}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DATABASE_NAME}"
 
 print(f"Using database URL: {database_url}")
 

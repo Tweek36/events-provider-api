@@ -17,9 +17,9 @@ from app.main import app
 pytest_plugins = ("pytest_asyncio",)
 
 
-POSTGRES_CONNECTION_STRING = "sqlite+aiosqlite:///./test_wallets.db"
+FAKE_DB = "sqlite+aiosqlite:///./test_wallets.db"
 engine = create_async_engine(
-    POSTGRES_CONNECTION_STRING,
+    FAKE_DB,
     future=True,
     echo=False,
     connect_args={"check_same_thread": False},
