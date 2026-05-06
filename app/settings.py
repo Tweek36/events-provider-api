@@ -7,7 +7,6 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5433
     POSTGRES_USERNAME: str = "postgres"
     POSTGRES_PASSWORD: str = "admin"
-    REDIS_URL: str = "redis://localhost:6379/0"
     EVENTS_PROVIDER_API_URL: HttpUrl = HttpUrl("https://api.events-provider.com")
     X_API_KEY: str = "your-api-key"
     HOSTNAME: str = "localhost"

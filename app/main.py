@@ -10,9 +10,8 @@ configure_logging(log_level="INFO", log_file="logs/app.log")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    cache.setup(settings.REDIS_URL)
+    cache.setup("memory://")
     await cache.init()
-    await cache.ping()
     yield
     await cache.close()
 

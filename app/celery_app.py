@@ -5,7 +5,8 @@ from app.settings import settings
 
 celery_app = Celery(
     "worker",
-    broker=settings.REDIS_URL,
+    broker="memory://",
+    backend="cache+memory://",
 )
 
 celery_app.conf.beat_schedule = {
