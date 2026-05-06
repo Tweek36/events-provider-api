@@ -32,17 +32,5 @@ services:
       - db
       - redis
 
-  celery:
-    build:
-      context: .
-      dockerfile: Dockerfile.celery
-    env_file:
-      - .env
-    depends_on:
-      - redis
-      - web
-    environment:
-      - HOSTNAME=web
-
 volumes:
   db_data: {}
