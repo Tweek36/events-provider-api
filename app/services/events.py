@@ -16,7 +16,7 @@ class EventsService:
         self.events_provider_client = EventsProviderClient(
             settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY
         )
-        self.settings.hostname = settings.HOSTNAME
+        self.hostname = settings.HOSTNAME
 
     async def events(self, date_from: str, page: int, page_size: int):
         count = (
@@ -33,12 +33,12 @@ class EventsService:
         return EventsResponse(
             count=count,
             next=(
-                f"http://{self.settings.hostname}/events?date_from={date_from}&page={page + 1}&page_size={page_size}"
+                f"http://{self.hostname}/events?date_from={date_from}&page={page + 1}&page_size={page_size}"
                 if page * page_size < count * page_size
                 else None
             ),
             previous=(
-                f"http://{self.settings.hostname}/events?date_from={date_from}&page={page - 1}&page_size={page_size}"
+                f"http://{self.hostname}/events?date_from={date_from}&page={page - 1}&page_size={page_size}"
                 if page > 1
                 else None
             ),
