@@ -13,7 +13,7 @@ class BaseRepository(Generic[ModelType]):
     async def get_by_id(self, id: Any, selectin: list | None = None) -> ModelType | None:
         stmt = select(self.model).where(self.model.id == id)
         if selectin:
-            stmt = stmt.options(selectinload(*selectin))
+            stmt = stmt.options(*[selectinload(i) for i in selectin])
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 

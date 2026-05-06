@@ -36,10 +36,10 @@ class EventsProviderClient:
                     params=params,
                     json=json,
                 )
-                if response.status_code >= 300:
+                if response.status_code >= 400:
                     raise HTTPException(
                         status_code=response.status_code,
-                        detail=response.json().get("detail"),
+                        detail=response.json(),
                     )
                 return response.json()
         except Exception as e:
@@ -72,7 +72,7 @@ class EventsProviderClient:
         response = await self._request(
             "POST",
             f"{self.base_url}api/events/{event_id}/register/",
-            json=body.model_dump(),
+            json=body.model_dump(mode='json'),
         )
         return RegisterResponse(**response)
 
@@ -82,7 +82,7 @@ class EventsProviderClient:
         response = await self._request(
             "DELETE",
             f"{self.base_url}api/events/{event_id}/unregister/",
-            json=body.model_dump(),
+            json=body.model_dump(mode='json'),
         )
         return UnregisterResponse(**response)
 
