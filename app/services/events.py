@@ -19,11 +19,7 @@ class EventsService:
         self.hostname = settings.HOSTNAME
 
     async def events(self, date_from: str, page: int, page_size: int):
-        count = (
-            await self.event_repository.count(datetime.strptime(date_from, "%Y-%m-%d"))
-            + page_size
-            - 1
-        ) // page_size
+        count = await self.event_repository.count(datetime.strptime(date_from, "%Y-%m-%d"))
         results = await self.event_repository.get_all(
             date_from=datetime.strptime(date_from, "%Y-%m-%d"),
             skip=(page - 1) * page_size,

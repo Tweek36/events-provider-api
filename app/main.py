@@ -5,13 +5,14 @@ from app.config.logging import ProblematicRequestLoggingMiddleware, configure_lo
 from app.settings import settings
 from contextlib import asynccontextmanager
 
-cache.setup(settings.REDIS_URL, prefix="my_app")
 configure_logging(log_level="INFO", log_file="logs/app.log")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    cache.setup(settings.REDIS_URL)
     await cache.init()
+    await cache.ping()
     yield
     await cache.close()
 
@@ -24,6 +25,7 @@ app.include_router(sync.router)
 app.include_router(events.router)
 app.include_router(tickets.router)
 
+
 @app.get("/api/health")
-def read_root():
+def health():
     return {"status": "ok"}

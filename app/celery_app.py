@@ -9,11 +9,12 @@ celery_app = Celery(
 )
 
 celery_app.conf.beat_schedule = {
-    'daily-sync-task': {
-        'task': 'celery_app.daily_sync',
-        'schedule': crontab(hour=3, minute=0), # Каждый день в 03:00
+    "daily-sync-task": {
+        "task": "app.celery_app.daily_sync",
+        "schedule": crontab(hour=3, minute=0),  # Каждый день в 03:00
     },
 }
+
 
 @celery_app.task
 def daily_sync():
