@@ -1,7 +1,9 @@
 from cashews import cache
 from fastapi import APIRouter, Depends, Query
+from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_session
+from app.exceptions import EventNotFound
 from app.services.events import EventsService
 import uuid
 
@@ -27,7 +29,10 @@ async def get_event(
     event_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ):
-    return await EventsService(session).get_event(event_id=event_id)
+    try:
+        return await EventsService(session).get_event(event_id=event_id)
+    except EventNotFound:
+        raise HTTPException(status_code=404, detail="Event not found")
 
 
 @router.get("/{event_id}/seats")
@@ -36,4 +41,7 @@ async def get_event_seats(
     event_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ):
-    return await EventsService(session).get_event_seats(event_id=event_id)
+    try:
+        return await EventsService(session).get_event_seats(event_id=event_id)
+    except EventNotFound:
+        raise HTTPException(status_code=404, detail="Event not found")

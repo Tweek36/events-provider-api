@@ -1,8 +1,8 @@
-from fastapi import HTTPException
 from typing import AsyncGenerator
 import uuid
 import httpx
 import structlog
+from app.exceptions import EventsProviderError
 from app.schemes.client import (
     EventsResponse,
     SeatsResponse,
@@ -12,14 +12,14 @@ from app.schemes.client import (
     UnregisterResponse,
 )
 from app.validators import validate_date_format
-from urllib.parse import urlparse, urlunparse, parse_qs
+from urllib.parse import urljoin, urlparse, urlunparse, parse_qs
 
 logger = structlog.get_logger()
 
 
 class EventsProviderClient:
     def __init__(self, base_url: str, api_key: str):
-        self.base_url = base_url
+        self.base_url = str(base_url)
         self.api_key = api_key
         self.next_page_url = None
 
@@ -37,9 +37,10 @@ class EventsProviderClient:
                     json=json,
                 )
                 if response.status_code >= 400:
-                    raise HTTPException(
+                    detail = response.json() if response.headers.get("content-type") == "application/json" else response.text
+                    raise EventsProviderError(
                         status_code=response.status_code,
-                        detail=response.json(),
+                        detail=str(detail),
                     )
                 return response.json()
         except Exception as e:
@@ -55,23 +56,24 @@ class EventsProviderClient:
 
     async def events(self, changed_at: str) -> EventsResponse:
         validate_date_format(changed_at)
+        url = urljoin(self.base_url, "api/events/")
         response = await self._request(
-            "GET", f"{self.base_url}api/events/", params={"changed_at": changed_at}
+            "GET", url, params={"changed_at": changed_at}
         )
         return EventsResponse(**response)
 
     async def seats(self, event_id: uuid.UUID) -> SeatsResponse:
-        response = await self._request(
-            "GET", f"{self.base_url}api/events/{event_id}/seats/"
-        )
+        url = urljoin(self.base_url, f"api/events/{event_id}/seats/")
+        response = await self._request("GET", url)
         return SeatsResponse(**response)
 
     async def register(
         self, event_id: uuid.UUID, body: RegisterRequest
     ) -> RegisterResponse:
+        url = urljoin(self.base_url, f"api/events/{event_id}/register/")
         response = await self._request(
             "POST",
-            f"{self.base_url}api/events/{event_id}/register/",
+            url,
             json=body.model_dump(mode='json'),
         )
         return RegisterResponse(**response)
@@ -79,9 +81,10 @@ class EventsProviderClient:
     async def unregister(
         self, event_id: uuid.UUID, body: UnregisterRequest
     ) -> UnregisterResponse:
+        url = urljoin(self.base_url, f"api/events/{event_id}/unregister/")
         response = await self._request(
             "DELETE",
-            f"{self.base_url}api/events/{event_id}/unregister/",
+            url,
             json=body.model_dump(mode='json'),
         )
         return UnregisterResponse(**response)
@@ -96,5 +99,6 @@ class EventsProviderClient:
                 break
             parsed = urlparse(response.next.unicode_string())
             url = urlunparse(parsed._replace(query="", fragment=""))
-            params = parse_qs(parsed.query)
+            # Преобразуем списки значений в строки, так как parse_qs возвращает списки
+            params = {k: v[0] for k, v in parse_qs(parsed.query).items()}
             response = EventsResponse(**await self._request("GET", url, params=params))

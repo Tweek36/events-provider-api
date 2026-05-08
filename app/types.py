@@ -1,10 +1,19 @@
 import datetime
 import re
 from typing import Literal, Any
+from enum import Enum
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
 
 SyncStatusType = Literal["synced", "unsynced", "syncing"]
+
+
+class EventStatus(str, Enum):
+    NEW = "new"
+    PUBLISHED = "published"
+    CANCELLED = "cancelled"
+    FINISHED = "finished"
+    REGISTRATION_CLOSED = "registration_closed"
 
 
 class DateStr(str):

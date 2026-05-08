@@ -24,12 +24,21 @@ class SyncService:
 
     async def trigger(self) -> SyncStatusType:
         try:
+            logger.info("sync_started")
             await self.metadata_repository.update_sync_status("syncing")
             await self.session.commit()
+
             metadata = await self.metadata_repository.get_metadata()
             changed_at = metadata.last_changed_at
+
             event = None
+            logger.info("events_fetching_started")
             async for response in self.events_provider_client.fetch_events(changed_at):
+                logger.info(
+                    "events_page_fetched",
+                    next=response.next,
+                    events_count=len(response.results),
+                )
                 for event in response.results:
                     if not await self.place_repository.get_by_id(event.place.id):
                         await self.place_repository.create(event.place.model_dump())
@@ -40,14 +49,19 @@ class SyncService:
                                 "place_id": event.place.id,
                             }
                         )
+
+            logger.info("events_fetching_completed")
+
             if event:
                 await self.metadata_repository.update_last_changed_at(
                     event.changed_at.strftime("%Y-%m-%d")
                 )
+
             await self.metadata_repository.update_sync_status("synced")
             await self.metadata_repository.update_last_sync_time(
                 datetime.datetime.now(datetime.UTC)
             )
+            logger.info("sync_completed", status="synced")
         except Exception as e:
             await self.session.rollback()
             await self.metadata_repository.update_sync_status("unsynced")
@@ -59,4 +73,5 @@ class SyncService:
                     await self.metadata_repository.get_metadata()
                 ).model_dump(exclude={"key"}),
             )
+            logger.info("sync_finished_with_error", status="unsynced")
         return (await self.metadata_repository.get_metadata()).sync_status

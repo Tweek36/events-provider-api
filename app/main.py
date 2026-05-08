@@ -1,10 +1,12 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from app.api import sync, events, tickets
 from cashews import cache
+
+from app.api import sync, events, tickets
 from app.config.logging import ProblematicRequestLoggingMiddleware, configure_logging
-from contextlib import asynccontextmanager
 
 configure_logging(log_level="INFO", log_file="logs/app.log")
 

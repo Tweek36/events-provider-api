@@ -4,7 +4,7 @@ import uuid
 from typing import Optional
 from datetime import datetime
 from app.database import Base
-from app.types import SyncStatusType
+from app.types import SyncStatusType, EventStatus
 
 
 class MetadataModel(Base):
@@ -62,7 +62,7 @@ class Event(Base):
     name: Mapped[str] = mapped_column(String)
     event_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     registration_deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    status: Mapped[str] = mapped_column(String)
+    status: Mapped[EventStatus] = mapped_column(String)
     number_of_visitors: Mapped[int] = mapped_column(Integer)
     status_changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 

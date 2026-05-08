@@ -1,9 +1,17 @@
 import datetime
 import uuid
-from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.client.events_provider import EventsProviderClient
+from app.exceptions import (
+    EventNotFound,
+    RegistrationClosed,
+    SeatUnavailable,
+    SeatAlreadyTaken,
+    TicketNotFound,
+    EventAlreadyOccurred,
+)
 from app.models import Event, Ticket
+from app.types import EventStatus
 from app.repositories.event import EventRepository
 from app.repositories.ticket import TicketRepository
 from app.schemes.client import RegisterRequest, UnregisterRequest
@@ -32,16 +40,14 @@ class TicketsService:
         event = await self.event_repository.get_by_id(
             body.event_id, selectin=[Event.place, Event.tickets]
         )
-        if not event or event.status != "published":
-            raise HTTPException(status_code=404, detail="Event not found")
+        if not event or event.status != EventStatus.PUBLISHED:
+            raise EventNotFound("Event not found")
         if event.registration_deadline < datetime.datetime.now(datetime.UTC):
-            raise HTTPException(
-                status_code=400, detail="Registration deadline has passed"
-            )
+            raise RegistrationClosed("Registration deadline has passed")
         if not self._is_seat_available(body.seat, event.place.seats_pattern):
-            raise HTTPException(status_code=400, detail="Seat is not available")
+            raise SeatUnavailable("Seat is not available")
         if event.tickets and any(t.seat == body.seat for t in event.tickets):
-            raise HTTPException(status_code=400, detail="Seat is already taken")
+            raise SeatAlreadyTaken("Seat is already taken")
         response = await self.events_provider_client.register(
             event_id=body.event_id, body=RegisterRequest(**body.model_dump())
         )
@@ -59,9 +65,9 @@ class TicketsService:
             ticket_id, selectin=[Ticket.event]
         )
         if not ticket:
-            raise HTTPException(status_code=404, detail="Ticket not found")
+            raise TicketNotFound("Ticket not found")
         if ticket.event.event_time <= datetime.datetime.now(datetime.UTC):
-            raise HTTPException(status_code=400, detail="Event has already occurred")
+            raise EventAlreadyOccurred("Event has already occurred")
         response = await self.events_provider_client.unregister(
             event_id=ticket.event_id, body=UnregisterRequest(ticket_id=ticket_id)
         )

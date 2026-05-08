@@ -1,12 +1,13 @@
-from fastapi import HTTPException
+from datetime import datetime
+import uuid
 
 from app.client.events_provider import EventsProviderClient
+from app.exceptions import EventNotFound
 from app.models import Event
 from app.repositories.event import EventRepository
-from datetime import datetime
 from app.settings import settings
 from app.schemes.events import EventResponse, EventSeatsResponse, EventsResponse
-import uuid
+from app.types import EventStatus
 
 
 class EventsService:
@@ -44,12 +45,12 @@ class EventsService:
     async def get_event(self, event_id: uuid.UUID):
         event = await self.event_repository.get_by_id(event_id, selectin=[Event.place])
         if not event:
-            raise HTTPException(status_code=404, detail="Event not found")
+            raise EventNotFound("Event not found")
         return EventResponse.model_validate(event)
 
     async def get_event_seats(self, event_id: uuid.UUID):
         event = await self.event_repository.get_by_id(event_id)
-        if not event or event.status != "published":
-            raise HTTPException(status_code=404, detail="Event not found")
+        if not event or event.status != EventStatus.PUBLISHED:
+            raise EventNotFound("Event not found")
         response = await self.events_provider_client.seats(event_id)
         return EventSeatsResponse(event_id=event_id, available_seats=response.seats)

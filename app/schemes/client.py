@@ -1,7 +1,7 @@
 from datetime import datetime
 import uuid
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl
-from app.types import SyncStatusType
+from app.types import SyncStatusType, EventStatus
 
 
 class Place(BaseModel):
@@ -41,8 +41,8 @@ class Event(BaseModel):
         ...,
         description="Дата и время окончания регистрации на событие в формате ISO 8601",
     )
-    status: str = Field(
-        ..., description="Статус события, например 'new', 'published' и т.д."
+    status: EventStatus = Field(
+        ..., description="Статус события: new, published, cancelled, finished"
     )
     number_of_visitors: int = Field(
         ..., description="Количество посетителей, зарегистрированных на событие"
