@@ -1,6 +1,7 @@
+import requests
 from celery import Celery
 from celery.schedules import crontab
-import requests
+
 from app.settings import settings
 
 celery_app = Celery(

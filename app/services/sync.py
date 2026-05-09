@@ -1,6 +1,8 @@
 import datetime
-from sqlalchemy.ext.asyncio import AsyncSession
+
 import structlog
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.client.events_provider import EventsProviderClient
 from app.repositories.event import EventRepository
 from app.repositories.metadata import MetadataRepository

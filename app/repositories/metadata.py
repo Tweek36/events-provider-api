@@ -1,6 +1,8 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import MetadataModel
 from datetime import datetime
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import MetadataModel
 from app.types import SyncStatusType
 
 

@@ -1,12 +1,14 @@
 from contextlib import asynccontextmanager
 
+from cashews import cache
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from cashews import cache
 
-from app.api import sync, events, tickets
-from app.config.logging import ProblematicRequestLoggingMiddleware, configure_logging
+from app.api import events, sync, tickets
+from app.config.logging import (ProblematicRequestLoggingMiddleware,
+                                configure_logging)
+from app.exceptions import EventsProviderError
 
 configure_logging(log_level="INFO", log_file="logs/app.log")
 
@@ -33,6 +35,14 @@ async def validation_exception_handler(request, exc):
     return JSONResponse(
         status_code=400,
         content={"detail": exc.errors()},
+    )
+
+
+@app.exception_handler(EventsProviderError)
+async def events_provider_exception_handler(request, exc: EventsProviderError):
+    return JSONResponse(
+        status_code=502,
+        content={"detail": f"Events provider error: {exc.detail}"},
     )
 
 

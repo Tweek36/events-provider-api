@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings
 from pydantic import ConfigDict, HttpUrl
+from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
     POSTGRES_DATABASE_NAME: str = "events_db"

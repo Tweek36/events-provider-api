@@ -1,18 +1,15 @@
-from typing import AsyncGenerator
 import uuid
+from typing import AsyncGenerator
+from urllib.parse import parse_qs, urljoin, urlparse, urlunparse
+
 import httpx
 import structlog
+
 from app.exceptions import EventsProviderError
-from app.schemes.client import (
-    EventsResponse,
-    SeatsResponse,
-    RegisterRequest,
-    RegisterResponse,
-    UnregisterRequest,
-    UnregisterResponse,
-)
+from app.schemes.client import (EventsResponse, RegisterRequest,
+                                RegisterResponse, SeatsResponse,
+                                UnregisterRequest, UnregisterResponse)
 from app.validators import validate_date_format
-from urllib.parse import urljoin, urlparse, urlunparse, parse_qs
 
 logger = structlog.get_logger()
 

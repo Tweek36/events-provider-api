@@ -1,6 +1,8 @@
-from datetime import datetime
 import uuid
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+
 from app.types import EventStatus
 
 

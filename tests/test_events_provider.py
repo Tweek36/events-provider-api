@@ -4,14 +4,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from app.client.events_provider import EventsProviderClient
-from app.schemes.client import (
-    EventsResponse,
-    SeatsResponse,
-    RegisterRequest,
-    RegisterResponse,
-    UnregisterRequest,
-    UnregisterResponse,
-)
+from app.schemes.client import (EventsResponse, RegisterRequest,
+                                RegisterResponse, SeatsResponse,
+                                UnregisterRequest, UnregisterResponse)
 
 
 @pytest.fixture

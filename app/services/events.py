@@ -1,12 +1,13 @@
-from datetime import datetime
 import uuid
+from datetime import datetime
 
 from app.client.events_provider import EventsProviderClient
 from app.exceptions import EventNotFound
 from app.models import Event
 from app.repositories.event import EventRepository
+from app.schemes.events import (EventResponse, EventSeatsResponse,
+                                EventsResponse)
 from app.settings import settings
-from app.schemes.events import EventResponse, EventSeatsResponse, EventsResponse
 from app.types import EventStatus
 
 

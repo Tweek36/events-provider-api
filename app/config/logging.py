@@ -1,11 +1,13 @@
 import logging
+import time
 import uuid
 from pathlib import Path
+
+import structlog
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-import structlog
-import time
 from starlette.responses import Response
+
 
 def configure_logging(log_level: str = "INFO", log_file: str = "app.log") -> None:
     log_path = Path(log_file)

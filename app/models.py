@@ -1,10 +1,12 @@
-from sqlalchemy import ForeignKey, Integer, String, DateTime, UUID
-from sqlalchemy.orm import mapped_column, Mapped, relationship
 import uuid
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from sqlalchemy import UUID, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database import Base
-from app.types import SyncStatusType, EventStatus
+from app.types import EventStatus, SyncStatusType
 
 
 class MetadataModel(Base):

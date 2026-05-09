@@ -1,22 +1,19 @@
 import datetime
 import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.client.events_provider import EventsProviderClient
-from app.exceptions import (
-    EventNotFound,
-    RegistrationClosed,
-    SeatUnavailable,
-    SeatAlreadyTaken,
-    TicketNotFound,
-    EventAlreadyOccurred,
-)
+from app.exceptions import (EventAlreadyOccurred, EventNotFound,
+                            RegistrationClosed, SeatAlreadyTaken,
+                            SeatUnavailable, TicketNotFound)
 from app.models import Event, Ticket
-from app.types import EventStatus
 from app.repositories.event import EventRepository
 from app.repositories.ticket import TicketRepository
 from app.schemes.client import RegisterRequest, UnregisterRequest
 from app.schemes.tickets import TicketsRequestBody
 from app.settings import settings
+from app.types import EventStatus
 
 
 class TicketsService:

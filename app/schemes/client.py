@@ -1,7 +1,9 @@
-from datetime import datetime
 import uuid
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl
-from app.types import SyncStatusType, EventStatus
+
+from app.types import EventStatus, SyncStatusType
 
 
 class Place(BaseModel):

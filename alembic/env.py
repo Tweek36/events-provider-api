@@ -1,18 +1,17 @@
 import os
 import sys
-
 from logging.config import fileConfig
 
-from alembic import context
+from dotenv import load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
-from dotenv import load_dotenv
+
+from alembic import context
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from app.models import Base
-from app.models import Event, Ticket, Place, MetadataModel  # noqa: F401
+from app.models import Base, Event, MetadataModel, Place, Ticket  # noqa: F401
 
 config = context.config
 fileConfig(config.config_file_name)

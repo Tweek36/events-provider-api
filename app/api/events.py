@@ -1,12 +1,13 @@
+import uuid
+
 from cashews import cache
 from fastapi import APIRouter, Depends, Query
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.database import get_session
 from app.exceptions import EventNotFound
 from app.services.events import EventsService
-import uuid
-
 from app.types import DateStr
 
 router = APIRouter(prefix="/api/events", tags=["events"])
