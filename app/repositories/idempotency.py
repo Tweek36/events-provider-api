@@ -26,8 +26,15 @@ class IdempotencyRepository(BaseRepository[IdempotencyKey]):
         Returns:
             str: SHA-256 хэш данных запроса
         """
+
+        def default_serializer(obj):
+            """Сериализатор для объектов, не поддерживаемых JSON по умолчанию."""
+            if isinstance(obj, uuid.UUID):
+                return str(obj)
+            raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
         # Сортируем ключи для стабильного хэша
-        sorted_data = json.dumps(request_data, sort_keys=True)
+        sorted_data = json.dumps(request_data, sort_keys=True, default=default_serializer)
         return hashlib.sha256(sorted_data.encode()).hexdigest()
 
     async def get_by_key(self, idempotency_key: str) -> IdempotencyKey | None:
