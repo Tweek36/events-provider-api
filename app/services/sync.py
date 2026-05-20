@@ -31,36 +31,58 @@ class SyncService:
             metadata = await self.metadata_repository.get_metadata()
             changed_at = metadata.last_changed_at
 
-            event = None
+            # Накопители для батчей
+            places_batch = []
+            events_batch = []
+            last_event = None
+
             logger.info("events_fetching_started")
             async for response in self.events_provider_client.fetch_events(changed_at):
-                logger.info(
-                    "events_page_fetched",
-                    next=response.next,
-                    events_count=len(response.results),
-                )
                 for event in response.results:
-                    if not await self.place_repository.get_by_id(event.place.id):
-                        await self.place_repository.create(event.place.model_dump())
-                    if not await self.event_repository.get_by_id(event.id):
-                        await self.event_repository.create(
-                            {
-                                **event.model_dump(exclude={"place"}),
-                                "place_id": event.place.id,
-                            }
-                        )
+                    # Накапливаем данные для батчевой вставки
+                    places_batch.append(event.place.model_dump())
+                    events_batch.append(
+                        {
+                            **event.model_dump(exclude={"place"}),
+                            "place_id": event.place.id,
+                        }
+                    )
+                    last_event = event
+
+                    # Вставляем батчами по 1000 записей
+                    if len(places_batch) >= 1000:
+                        await self.place_repository.bulk_upsert(places_batch)
+                        await self.event_repository.bulk_upsert(events_batch)
+                        places_batch.clear()
+                        events_batch.clear()
+
+            # Вставляем остатки
+            if places_batch:
+                await self.place_repository.bulk_upsert(places_batch)
+                await self.event_repository.bulk_upsert(events_batch)
 
             logger.info("events_fetching_completed")
 
-            if event:
-                await self.metadata_repository.update_last_changed_at(event.changed_at.strftime("%Y-%m-%d"))
+            # Обновляем метаданные одним запросом
+            if last_event:
+                await self.metadata_repository.bulk_update_metadata(
+                    {
+                        "sync_status": "synced",
+                        "last_sync_time": datetime.datetime.now(datetime.UTC),
+                        "last_changed_at": last_event.changed_at.strftime("%Y-%m-%d"),
+                    }
+                )
+            else:
+                await self.metadata_repository.update_sync_status("synced")
+                await self.metadata_repository.update_last_sync_time(datetime.datetime.now(datetime.UTC))
 
-            await self.metadata_repository.update_sync_status("synced")
-            await self.metadata_repository.update_last_sync_time(datetime.datetime.now(datetime.UTC))
+            # Один коммит в конце
+            await self.session.commit()
             logger.info("sync_completed", status="synced")
         except Exception as e:
             await self.session.rollback()
             await self.metadata_repository.update_sync_status("unsynced")
+            await self.session.commit()
             logger.exception(
                 "sync_failed",
                 error_type=type(e).__name__,
@@ -68,6 +90,7 @@ class SyncService:
                 metadata=Metadata.model_validate(await self.metadata_repository.get_metadata()).model_dump(
                     exclude={"key"}
                 ),
+                response=response.model_dump() if last_event else None,
             )
             logger.info("sync_finished_with_error", status="unsynced")
         return (await self.metadata_repository.get_metadata()).sync_status

@@ -9,6 +9,7 @@ from app.database import get_session
 from app.exceptions import (
     EventAlreadyOccurred,
     EventNotFound,
+    IdempotencyConflict,
     RegistrationClosed,
     SeatAlreadyTaken,
     SeatUnavailable,
@@ -32,6 +33,8 @@ async def register(
         raise HTTPException(status_code=404, detail="Event not found") from e
     except (RegistrationClosed, SeatUnavailable, SeatAlreadyTaken) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    except IdempotencyConflict as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
     except Exception as e:
         logger.error(
             "ticket_creation_failed_with_data",

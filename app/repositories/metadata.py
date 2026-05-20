@@ -39,3 +39,16 @@ class MetadataRepository:
     async def update_last_changed_at(self, changed_at: datetime) -> None:
         (await self.get_metadata()).last_changed_at = changed_at
         await self.session.flush()
+
+    async def bulk_update_metadata(self, updates: dict) -> None:
+        """
+        Обновление нескольких полей метаданных одним запросом.
+
+        Args:
+            updates: Словарь с полями для обновления, например:
+                    {'sync_status': 'synced', 'last_sync_time': datetime.now()}
+        """
+        metadata = await self.get_metadata()
+        for key, value in updates.items():
+            setattr(metadata, key, value)
+        await self.session.flush()
