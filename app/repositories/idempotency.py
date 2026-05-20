@@ -3,6 +3,7 @@ import json
 import uuid
 
 from sqlalchemy import select
+from sqlalchemy.ext import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import IdempotencyKey
@@ -68,7 +69,7 @@ class IdempotencyRepository(BaseRepository[IdempotencyKey]):
         Returns:
             IdempotencyKey: Созданная запись
         """
-        request_hash = self.compute_request_hash(request_data)
+        request_hash = await asyncio.to_thread(self.compute_request_hash, request_data)
 
         key_record = IdempotencyKey(
             idempotency_key=idempotency_key,

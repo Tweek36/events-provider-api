@@ -11,6 +11,7 @@ from app.api import events, sync, tickets
 from app.config.logging import ProblematicRequestLoggingMiddleware, configure_logging
 from app.exceptions import EventsProviderError
 from app.settings import settings
+from app.workers.celery_worker import celery_worker
 from app.workers.outbox_worker import outbox_worker
 
 configure_logging(log_level="INFO", log_file="logs/app.log")
@@ -30,13 +31,17 @@ async def lifespan(app: FastAPI):
     cache.setup("mem://")
     await cache.init()
 
+    # Запустить Celery worker и beat
+    await celery_worker.start()
+
     # Запустить outbox worker
     await outbox_worker.start()
 
     yield
 
-    # Остановить outbox worker
+    # Остановить workers
     await outbox_worker.stop()
+    await celery_worker.stop()
     await cache.close()
 
 
