@@ -6,9 +6,14 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
-from app.exceptions import (EventAlreadyOccurred, EventNotFound,
-                            RegistrationClosed, SeatAlreadyTaken,
-                            SeatUnavailable, TicketNotFound)
+from app.exceptions import (
+    EventAlreadyOccurred,
+    EventNotFound,
+    RegistrationClosed,
+    SeatAlreadyTaken,
+    SeatUnavailable,
+    TicketNotFound,
+)
 from app.schemes.tickets import TicketsRequestBody
 from app.services.tickets import TicketsService
 
@@ -23,10 +28,10 @@ async def register(
 ):
     try:
         return await TicketsService(session).register(body)
-    except EventNotFound:
-        raise HTTPException(status_code=404, detail="Event not found")
+    except EventNotFound as e:
+        raise HTTPException(status_code=404, detail="Event not found") from e
     except (RegistrationClosed, SeatUnavailable, SeatAlreadyTaken) as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         logger.error(
             "ticket_creation_failed_with_data",
@@ -44,10 +49,10 @@ async def unregister(
 ):
     try:
         return await TicketsService(session).unregister(ticket_id)
-    except TicketNotFound:
-        raise HTTPException(status_code=404, detail="Ticket not found")
+    except TicketNotFound as e:
+        raise HTTPException(status_code=404, detail="Ticket not found") from e
     except EventAlreadyOccurred as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         logger.error(
             "ticket_deletion_failed",

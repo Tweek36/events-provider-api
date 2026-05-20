@@ -1,6 +1,6 @@
 import datetime
 import re
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import GetCoreSchemaHandler
@@ -9,7 +9,7 @@ from pydantic_core import core_schema
 SyncStatusType = Literal["synced", "unsynced", "syncing"]
 
 
-class EventStatus(str, Enum):
+class EventStatus(StrEnum):
     NEW = "new"
     PUBLISHED = "published"
     CANCELLED = "cancelled"
@@ -23,14 +23,12 @@ class DateStr(str):
             raise ValueError("Invalid format")
         try:
             datetime.datetime.strptime(value, "%Y-%m-%d")
-        except ValueError:
-            raise ValueError("Invalid date")
+        except ValueError as e:
+            raise ValueError("Invalid date") from e
         return super().__new__(cls, value)
 
     @classmethod
-    def __get_pydantic_core_schema__(
-        cls, source_type: Any, handler: GetCoreSchemaHandler
-    ) -> core_schema.CoreSchema:
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> core_schema.CoreSchema:
         return core_schema.no_info_after_validator_function(
             cls.validate,
             core_schema.str_schema(),

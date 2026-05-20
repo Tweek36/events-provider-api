@@ -5,8 +5,7 @@ from app.client.events_provider import EventsProviderClient
 from app.exceptions import EventNotFound
 from app.models import Event
 from app.repositories.event import EventRepository
-from app.schemes.events import (EventResponse, EventSeatsResponse,
-                                EventsResponse)
+from app.schemes.events import EventResponse, EventSeatsResponse, EventsResponse
 from app.settings import settings
 from app.types import EventStatus
 
@@ -15,9 +14,7 @@ class EventsService:
     def __init__(self, session):
         self.session = session
         self.event_repository = EventRepository(session)
-        self.events_provider_client = EventsProviderClient(
-            settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY
-        )
+        self.events_provider_client = EventsProviderClient(settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY)
         self.hostname = settings.HOSTNAME
 
     async def events(self, date_from: str, page: int, page_size: int):

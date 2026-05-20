@@ -4,9 +4,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from app.client.events_provider import EventsProviderClient
-from app.schemes.client import (EventsResponse, RegisterRequest,
-                                RegisterResponse, SeatsResponse,
-                                UnregisterRequest, UnregisterResponse)
+from app.exceptions import EventsProviderError
+from app.schemes.client import (
+    EventsResponse,
+    RegisterRequest,
+    RegisterResponse,
+    SeatsResponse,
+    UnregisterRequest,
+    UnregisterResponse,
+)
 
 
 @pytest.fixture
@@ -20,12 +26,12 @@ def mock_httpx_client():
     mock_response = AsyncMock()
     mock_response.status_code = 200
     mock_response.json = MagicMock(return_value={})
-    
+
     mock_client = AsyncMock()
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=False)
     mock_client.request = AsyncMock(return_value=mock_response)
-    
+
     return mock_client, mock_response
 
 
@@ -81,13 +87,13 @@ class TestEventsProviderClient:
         mock_response.json.return_value = {"detail": "Not found"}
 
         with patch("httpx.AsyncClient", return_value=mock_client):
-            with pytest.raises(Exception):
+            with pytest.raises(EventsProviderError):
                 await client.events("2026-05-01")
 
     @pytest.mark.asyncio
     async def test_events_invalid_date_format(self, client):
         """Тест обработки невалидного формата даты."""
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             await client.events("invalid-date")
 
     @pytest.mark.asyncio
@@ -95,9 +101,7 @@ class TestEventsProviderClient:
         """Тест успешного получения мест события."""
         mock_client, mock_response = mock_httpx_client
         event_id = uuid.uuid4()
-        mock_response.json.return_value = {
-            "seats": ["A1", "A2", "A3"]
-        }
+        mock_response.json.return_value = {"seats": ["A1", "A2", "A3"]}
 
         with patch("httpx.AsyncClient", return_value=mock_client):
             result = await client.seats(event_id)
@@ -115,7 +119,7 @@ class TestEventsProviderClient:
         event_id = uuid.uuid4()
 
         with patch("httpx.AsyncClient", return_value=mock_client):
-            with pytest.raises(Exception):
+            with pytest.raises(EventsProviderError):
                 await client.seats(event_id)
 
     @pytest.mark.asyncio
@@ -124,16 +128,9 @@ class TestEventsProviderClient:
         mock_client, mock_response = mock_httpx_client
         event_id = uuid.uuid4()
         ticket_id = uuid.uuid4()
-        mock_response.json.return_value = {
-            "ticket_id": str(ticket_id)
-        }
+        mock_response.json.return_value = {"ticket_id": str(ticket_id)}
 
-        register_data = RegisterRequest(
-            first_name="Ivan",
-            last_name="Ivanov",
-            seat="A1",
-            email="ivan@example.com"
-        )
+        register_data = RegisterRequest(first_name="Ivan", last_name="Ivanov", seat="A1", email="ivan@example.com")
 
         with patch("httpx.AsyncClient", return_value=mock_client):
             result = await client.register(event_id, register_data)
@@ -150,9 +147,7 @@ class TestEventsProviderClient:
         mock_client, mock_response = mock_httpx_client
         event_id = uuid.uuid4()
         ticket_id = uuid.uuid4()
-        mock_response.json.return_value = {
-            "success": True
-        }
+        mock_response.json.return_value = {"success": True}
 
         unregister_data = UnregisterRequest(ticket_id=ticket_id)
 
@@ -210,7 +205,7 @@ class TestEventsProviderClient:
         event_id_1 = uuid.uuid4()
         event_id_2 = uuid.uuid4()
         place_id = uuid.uuid4()
-        
+
         # Настраиваем ответы для первого и второго запроса
         first_response = {
             "next": "http://testserver/api/events/?page=2",
@@ -264,7 +259,7 @@ class TestEventsProviderClient:
                 }
             ],
         }
-        
+
         mock_response.json.side_effect = [first_response, second_response]
 
         with patch("httpx.AsyncClient", return_value=mock_client):
@@ -283,5 +278,5 @@ class TestEventsProviderClient:
         mock_client.request.side_effect = Exception("Connection error")
 
         with patch("httpx.AsyncClient", return_value=mock_client):
-            with pytest.raises(Exception):
+            with pytest.raises(Exception, match="Connection error"):
                 await client.events("2026-05-01")

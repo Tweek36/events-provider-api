@@ -4,9 +4,14 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.client.events_provider import EventsProviderClient
-from app.exceptions import (EventAlreadyOccurred, EventNotFound,
-                            RegistrationClosed, SeatAlreadyTaken,
-                            SeatUnavailable, TicketNotFound)
+from app.exceptions import (
+    EventAlreadyOccurred,
+    EventNotFound,
+    RegistrationClosed,
+    SeatAlreadyTaken,
+    SeatUnavailable,
+    TicketNotFound,
+)
 from app.models import Event, Ticket
 from app.repositories.event import EventRepository
 from app.repositories.ticket import TicketRepository
@@ -19,24 +24,19 @@ from app.types import EventStatus
 class TicketsService:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.events_provider_client = EventsProviderClient(
-            settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY
-        )
+        self.events_provider_client = EventsProviderClient(settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY)
         self.ticket_repository = TicketRepository(session)
         self.event_repository = EventRepository(session)
 
     def _is_seat_available(self, seat: str, seats_pattern: str) -> bool:
         seat_row, seat_num = seat[0], int(seat[1:])
         return any(
-            seat_row == r[0]
-            and (int(r[1:].split("-")[0])) <= seat_num <= int(r[1:].split("-")[1])
+            seat_row == r[0] and (int(r[1:].split("-")[0])) <= seat_num <= int(r[1:].split("-")[1])
             for r in seats_pattern.split(",")
         )
 
     async def register(self, body: TicketsRequestBody):
-        event = await self.event_repository.get_by_id(
-            body.event_id, selectin=[Event.place, Event.tickets]
-        )
+        event = await self.event_repository.get_by_id(body.event_id, selectin=[Event.place, Event.tickets])
         if not event or event.status != EventStatus.PUBLISHED:
             raise EventNotFound("Event not found")
         if event.registration_deadline < datetime.datetime.now(datetime.UTC):
@@ -58,9 +58,7 @@ class TicketsService:
         return response
 
     async def unregister(self, ticket_id: uuid.UUID):
-        ticket = await self.ticket_repository.get_by_id(
-            ticket_id, selectin=[Ticket.event]
-        )
+        ticket = await self.ticket_repository.get_by_id(ticket_id, selectin=[Ticket.event])
         if not ticket:
             raise TicketNotFound("Ticket not found")
         if ticket.event.event_time <= datetime.datetime.now(datetime.UTC):

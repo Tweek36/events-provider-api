@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import UUID, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -20,17 +19,13 @@ class MetadataModel(Base):
         server_default="metadata",
     )
 
-    last_sync_time: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), server_default=None, nullable=True
-    )
+    last_sync_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), server_default=None, nullable=True)
     last_changed_at: Mapped[str] = mapped_column(
         String,
         server_default="2000-01-01",
         nullable=False,
     )
-    sync_status: Mapped[SyncStatusType] = mapped_column(
-        String, server_default="unsynced", nullable=False
-    )
+    sync_status: Mapped[SyncStatusType] = mapped_column(String, server_default="unsynced", nullable=False)
 
 
 class Place(Base):
@@ -45,9 +40,7 @@ class Place(Base):
     address: Mapped[str] = mapped_column(String)
     seats_pattern: Mapped[str] = mapped_column(String)
 
-    events: Mapped[list["Event"]] = relationship(
-        back_populates="place", lazy="selectin"
-    )
+    events: Mapped[list["Event"]] = relationship(back_populates="place", lazy="selectin")
 
 
 class Event(Base):
@@ -55,9 +48,7 @@ class Event(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, index=True)
 
-    place_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey("places.id", ondelete="CASCADE"), index=True
-    )
+    place_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("places.id", ondelete="CASCADE"), index=True)
 
     changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
@@ -70,9 +61,7 @@ class Event(Base):
 
     place: Mapped["Place"] = relationship(back_populates="events")
 
-    tickets: Mapped[list["Ticket"]] = relationship(
-        back_populates="event", lazy="selectin"
-    )
+    tickets: Mapped[list["Ticket"]] = relationship(back_populates="event", lazy="selectin")
 
 
 class Ticket(Base):
@@ -80,9 +69,7 @@ class Ticket(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, index=True)
 
-    event_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey("events.id", ondelete="CASCADE"), index=True
-    )
+    event_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("events.id", ondelete="CASCADE"), index=True)
     seat: Mapped[str] = mapped_column(String)
 
     event: Mapped["Event"] = relationship(back_populates="tickets")

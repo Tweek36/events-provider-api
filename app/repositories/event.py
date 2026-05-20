@@ -1,5 +1,5 @@
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Sequence
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,9 +13,7 @@ class EventRepository(BaseRepository[Event]):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session, model=Event)
 
-    async def get_all(
-        self, date_from: datetime, skip: int = 0, limit: int = 100
-    ) -> Sequence[Event]:
+    async def get_all(self, date_from: datetime, skip: int = 0, limit: int = 100) -> Sequence[Event]:
         result = await self.session.execute(
             select(Event)
             .where(Event.event_time >= date_from)

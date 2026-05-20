@@ -20,9 +20,7 @@ async def events(
     page_size: int | None = Query(default=20, gt=0),
     session: AsyncSession = Depends(get_session),
 ):
-    return await EventsService(session).events(
-        date_from=date_from, page=page, page_size=page_size
-    )
+    return await EventsService(session).events(date_from=date_from, page=page, page_size=page_size)
 
 
 @router.get("/{event_id}")
@@ -32,8 +30,8 @@ async def get_event(
 ):
     try:
         return await EventsService(session).get_event(event_id=event_id)
-    except EventNotFound:
-        raise HTTPException(status_code=404, detail="Event not found")
+    except EventNotFound as e:
+        raise HTTPException(status_code=404, detail="Event not found") from e
 
 
 @router.get("/{event_id}/seats")
@@ -44,5 +42,5 @@ async def get_event_seats(
 ):
     try:
         return await EventsService(session).get_event_seats(event_id=event_id)
-    except EventNotFound:
-        raise HTTPException(status_code=404, detail="Event not found")
+    except EventNotFound as e:
+        raise HTTPException(status_code=404, detail="Event not found") from e

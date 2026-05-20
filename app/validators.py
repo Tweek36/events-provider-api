@@ -3,25 +3,27 @@ from datetime import datetime
 
 
 def validate_date_format(v: str) -> str:
-    pattern = r'^\d{4}-\d{2}-\d{2}$'
+    pattern = r"^\d{4}-\d{2}-\d{2}$"
     if not re.match(pattern, v):
         raise ValueError(f"Неверный формат даты: '{v}'. Ожидается YYYY-MM-DD.")
-    
+
     try:
-        datetime.strptime(v, '%Y-%m-%d')
-    except ValueError:
-        raise ValueError(f"Невалидная дата: '{v}'.")
-    
+        datetime.strptime(v, "%Y-%m-%d")
+    except ValueError as e:
+        raise ValueError(f"Невалидная дата: '{v}'.") from e
+
     return v
 
+
 def validate_seat_pattern(v: str) -> str:
-    pattern = r'^[A-Z]\d+$'
+    pattern = r"^[A-Z]\d+$"
     if not re.match(pattern, v):
         raise ValueError(f"Неверный формат паттерна мест: '{v}'. Ожидается буква и цифра.")
     return v
 
+
 def validate_seats_pattern(v: str) -> str:
-    pattern = r'^[A-Z]\d+-\d+(,[A-Z]\d+-\d+)*$'
+    pattern = r"^[A-Z]\d+-\d+(,[A-Z]\d+-\d+)*$"
     if not re.match(pattern, v):
         raise ValueError(f"Неверный формат схемы рассадки: '{v}'. Ожидается формат 'A1-10,B1-20' и т.д.")
     return v

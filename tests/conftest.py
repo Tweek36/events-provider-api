@@ -1,7 +1,7 @@
 import asyncio
 import sys
+from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
-from typing import AsyncGenerator, Generator
 
 import pytest
 from fastapi.testclient import TestClient
@@ -31,7 +31,7 @@ AsyncSessionLocal = sessionmaker(
 )
 
 
-async def override_get_session() -> AsyncGenerator[AsyncSession, None]:
+async def override_get_session() -> AsyncGenerator[AsyncSession]:
     async with AsyncSessionLocal() as session:
         yield session
 
@@ -48,13 +48,13 @@ def prepare_database():  # Подготовка базы данных
 
 
 @pytest.fixture(autouse=True)
-def override_db() -> Generator[None, None, None]:  # Переопределение БД
+def override_db() -> Generator[None]:  # Переопределение БД
     app.dependency_overrides[get_session] = override_get_session
     yield
     app.dependency_overrides.clear()
 
 
 @pytest.fixture
-def client() -> Generator[TestClient, None, None]:
+def client() -> Generator[TestClient]:
     client = TestClient(app)
     yield client

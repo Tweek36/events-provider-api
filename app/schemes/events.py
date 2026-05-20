@@ -19,33 +19,21 @@ class Event(BaseModel):
     id: uuid.UUID = Field(..., description="Уникальный идентификатор события")
     name: str = Field(..., description="Название события")
     place: Place = Field(..., description="Место проведения события")
-    event_time: datetime = Field(
-        ..., description="Дата и время проведения события в формате ISO 8601"
-    )
+    event_time: datetime = Field(..., description="Дата и время проведения события в формате ISO 8601")
     registration_deadline: datetime = Field(
         ...,
         description="Дата и время окончания регистрации на событие в формате ISO 8601",
     )
-    status: EventStatus = Field(
-        ..., description="Статус события: new, published, cancelled, finished"
-    )
-    number_of_visitors: int = Field(
-        ..., description="Количество посетителей, зарегистрированных на событие"
-    )
+    status: EventStatus = Field(..., description="Статус события: new, published, cancelled, finished")
+    number_of_visitors: int = Field(..., description="Количество посетителей, зарегистрированных на событие")
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class EventsResponse(BaseModel):
-    count: int = Field(
-        ..., description="Общее количество событий, доступных для получения"
-    )
-    next: HttpUrl | None = Field(
-        None, description="URL для получения следующей страницы событий"
-    )
-    previous: HttpUrl | None = Field(
-        None, description="URL для получения предыдущей страницы событий"
-    )
+    count: int = Field(..., description="Общее количество событий, доступных для получения")
+    next: HttpUrl | None = Field(None, description="URL для получения следующей страницы событий")
+    previous: HttpUrl | None = Field(None, description="URL для получения предыдущей страницы событий")
     results: list[Event] = Field(..., description="Список событий")
 
 
@@ -63,6 +51,4 @@ class EventResponse(Event):
 
 class EventSeatsResponse(BaseModel):
     event_id: uuid.UUID = Field(..., description="Уникальный идентификатор события")
-    available_seats: list[str] = Field(
-        ..., description="Список доступных мест для регистрации на событие"
-    )
+    available_seats: list[str] = Field(..., description="Список доступных мест для регистрации на событие")

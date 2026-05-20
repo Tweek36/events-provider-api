@@ -1,14 +1,19 @@
 import uuid
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 from urllib.parse import parse_qs, urljoin, urlparse, urlunparse
 
 import httpx
 import structlog
 
 from app.exceptions import EventsProviderError
-from app.schemes.client import (EventsResponse, RegisterRequest,
-                                RegisterResponse, SeatsResponse,
-                                UnregisterRequest, UnregisterResponse)
+from app.schemes.client import (
+    EventsResponse,
+    RegisterRequest,
+    RegisterResponse,
+    SeatsResponse,
+    UnregisterRequest,
+    UnregisterResponse,
+)
 from app.validators import validate_date_format
 
 logger = structlog.get_logger()
@@ -20,13 +25,9 @@ class EventsProviderClient:
         self.api_key = api_key
         self.next_page_url = None
 
-    async def _request(
-        self, method: str, url: str, params: dict = None, json: dict = None
-    ) -> dict:
+    async def _request(self, method: str, url: str, params: dict = None, json: dict = None) -> dict:
         try:
-            async with httpx.AsyncClient(
-                follow_redirects=True, headers={"x-api-key": self.api_key}
-            ) as client:
+            async with httpx.AsyncClient(follow_redirects=True, headers={"x-api-key": self.api_key}) as client:
                 response = await client.request(
                     method,
                     url=url,
@@ -34,7 +35,9 @@ class EventsProviderClient:
                     json=json,
                 )
                 if response.status_code >= 400:
-                    detail = response.json() if response.headers.get("content-type") == "application/json" else response.text
+                    detail = (
+                        response.json() if response.headers.get("content-type") == "application/json" else response.text
+                    )
                     raise EventsProviderError(
                         status_code=response.status_code,
                         detail=str(detail),
@@ -54,9 +57,7 @@ class EventsProviderClient:
     async def events(self, changed_at: str) -> EventsResponse:
         validate_date_format(changed_at)
         url = urljoin(self.base_url, "api/events/")
-        response = await self._request(
-            "GET", url, params={"changed_at": changed_at}
-        )
+        response = await self._request("GET", url, params={"changed_at": changed_at})
         return EventsResponse(**response)
 
     async def seats(self, event_id: uuid.UUID) -> SeatsResponse:
@@ -64,31 +65,25 @@ class EventsProviderClient:
         response = await self._request("GET", url)
         return SeatsResponse(**response)
 
-    async def register(
-        self, event_id: uuid.UUID, body: RegisterRequest
-    ) -> RegisterResponse:
+    async def register(self, event_id: uuid.UUID, body: RegisterRequest) -> RegisterResponse:
         url = urljoin(self.base_url, f"api/events/{event_id}/register/")
         response = await self._request(
             "POST",
             url,
-            json=body.model_dump(mode='json'),
+            json=body.model_dump(mode="json"),
         )
         return RegisterResponse(**response)
 
-    async def unregister(
-        self, event_id: uuid.UUID, body: UnregisterRequest
-    ) -> UnregisterResponse:
+    async def unregister(self, event_id: uuid.UUID, body: UnregisterRequest) -> UnregisterResponse:
         url = urljoin(self.base_url, f"api/events/{event_id}/unregister/")
         response = await self._request(
             "DELETE",
             url,
-            json=body.model_dump(mode='json'),
+            json=body.model_dump(mode="json"),
         )
         return UnregisterResponse(**response)
 
-    async def fetch_events(
-        self, changed_at: str
-    ) -> AsyncGenerator[EventsResponse, None]:
+    async def fetch_events(self, changed_at: str) -> AsyncGenerator[EventsResponse]:
         response = await self.events(changed_at)
         while True:
             yield response

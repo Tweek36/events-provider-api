@@ -1,4 +1,4 @@
-from typing import Any, Generic, Type, TypeVar
+from typing import Any, TypeVar
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,8 +6,9 @@ from sqlalchemy.orm import selectinload
 
 ModelType = TypeVar("ModelType")
 
-class BaseRepository(Generic[ModelType]):
-    def __init__(self, session: AsyncSession, model: Type[ModelType]):
+
+class BaseRepository[ModelType]:
+    def __init__(self, session: AsyncSession, model: type[ModelType]):
         self.session = session
         self.model = model
 
@@ -32,4 +33,3 @@ class BaseRepository(Generic[ModelType]):
         await self.session.delete(obj)
         await self.session.flush()
         return True
-    

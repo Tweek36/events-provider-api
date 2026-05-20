@@ -6,8 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.api import events, sync, tickets
-from app.config.logging import (ProblematicRequestLoggingMiddleware,
-                                configure_logging)
+from app.config.logging import ProblematicRequestLoggingMiddleware, configure_logging
 from app.exceptions import EventsProviderError
 
 configure_logging(log_level="INFO", log_file="logs/app.log")

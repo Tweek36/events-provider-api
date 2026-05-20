@@ -44,9 +44,7 @@ class ProblematicRequestLoggingMiddleware(BaseHTTPMiddleware):
 
         request_id = str(uuid.uuid4())
 
-        structlog.contextvars.bind_contextvars(
-            request_id=request_id, method=request.method, path=request.url.path
-        )
+        structlog.contextvars.bind_contextvars(request_id=request_id, method=request.method, path=request.url.path)
 
         try:
             response = await call_next(request)

@@ -17,9 +17,7 @@ logger = structlog.get_logger()
 class SyncService:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.events_provider_client = EventsProviderClient(
-            settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY
-        )
+        self.events_provider_client = EventsProviderClient(settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY)
         self.metadata_repository = MetadataRepository(session)
         self.event_repository = EventRepository(session)
         self.place_repository = PlaceRepository(session)
@@ -55,14 +53,10 @@ class SyncService:
             logger.info("events_fetching_completed")
 
             if event:
-                await self.metadata_repository.update_last_changed_at(
-                    event.changed_at.strftime("%Y-%m-%d")
-                )
+                await self.metadata_repository.update_last_changed_at(event.changed_at.strftime("%Y-%m-%d"))
 
             await self.metadata_repository.update_sync_status("synced")
-            await self.metadata_repository.update_last_sync_time(
-                datetime.datetime.now(datetime.UTC)
-            )
+            await self.metadata_repository.update_last_sync_time(datetime.datetime.now(datetime.UTC))
             logger.info("sync_completed", status="synced")
         except Exception as e:
             await self.session.rollback()
@@ -71,9 +65,9 @@ class SyncService:
                 "sync_failed",
                 error_type=type(e).__name__,
                 error_msg=str(e),
-                metadata=Metadata.model_validate(
-                    await self.metadata_repository.get_metadata()
-                ).model_dump(exclude={"key"}),
+                metadata=Metadata.model_validate(await self.metadata_repository.get_metadata()).model_dump(
+                    exclude={"key"}
+                ),
             )
             logger.info("sync_finished_with_error", status="unsynced")
         return (await self.metadata_repository.get_metadata()).sync_status
