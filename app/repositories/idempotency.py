@@ -1,9 +1,9 @@
+import asyncio
 import hashlib
 import json
 import uuid
 
 from sqlalchemy import select
-from sqlalchemy.ext import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import IdempotencyKey
