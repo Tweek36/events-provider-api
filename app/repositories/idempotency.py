@@ -52,6 +52,11 @@ class IdempotencyRepository(BaseRepository[IdempotencyKey]):
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_by_ticket_id(self, ticket_id: uuid.UUID) -> IdempotencyKey | None:
+        stmt = select(IdempotencyKey).where(IdempotencyKey.ticket_id == ticket_id)
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def create_key(
         self,
         idempotency_key: str,

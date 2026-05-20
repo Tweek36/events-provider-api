@@ -5,7 +5,8 @@ import structlog
 
 from app.client.capashino import CapashinoClient
 from app.database import AsyncSessionLocal
-from app.models import Event
+from app.models import Ticket
+from app.repositories.idempotency import IdempotencyRepository
 from app.repositories.outbox import OutboxRepository
 from app.services.tickets import TicketsService
 from app.settings import settings
@@ -64,7 +65,9 @@ class OutboxWorker:
                                     continue
 
                                 ticket_service = TicketsService(session)
-                                ticket = await ticket_service.ticket_repository.get_by_id(ticket_id, selectin=[Event])
+                                ticket = await ticket_service.ticket_repository.get_by_id(
+                                    ticket_id, selectin=[Ticket.event]
+                                )
 
                                 if not ticket:
                                     logger.error(
@@ -83,13 +86,18 @@ class OutboxWorker:
                                 )
 
                                 message = f"Вы успешно зарегистрированы на мероприятие - {ticket.event.name}"
-                                idempotency_key = f"ticket_{ticket_id}"
+                                idempotency_repository = IdempotencyRepository(session)
+                                idempotency_key = await idempotency_repository.get_by_ticket_id(ticket_id)
+
+                                idempotency_key_str = (
+                                    idempotency_key.idempotency_key if idempotency_key else f"ticket_{ticket_id}"
+                                )
 
                                 try:
                                     await capashino_client.send_notification(
                                         message=message,
                                         reference_id=ticket_id,
-                                        idempotency_key=idempotency_key,
+                                        idempotency_key=idempotency_key_str,
                                     )
 
                                     # Успешная отправка

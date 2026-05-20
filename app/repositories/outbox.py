@@ -1,5 +1,5 @@
+import datetime
 import uuid
-from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,7 +29,7 @@ class OutboxRepository(BaseRepository[OutboxEvent]):
         event = await self.get_by_id(event_id)
         if event:
             event.status = OutboxStatus.SENT
-            event.processed_at = datetime.now(datetime.UTC)
+            event.processed_at = datetime.datetime.now(datetime.UTC)
             await self.session.flush()
 
     async def increment_attempts(self, event_id: uuid.UUID) -> None:
@@ -44,5 +44,5 @@ class OutboxRepository(BaseRepository[OutboxEvent]):
         event = await self.get_by_id(event_id)
         if event:
             event.status = OutboxStatus.FAILED
-            event.processed_at = datetime.now(datetime.UTC)
+            event.processed_at = datetime.datetime.now(datetime.UTC)
             await self.session.flush()
