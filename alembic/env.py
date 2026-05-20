@@ -11,7 +11,7 @@ from alembic import context
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from app.models import Base, Event, MetadataModel, Place, Ticket  # noqa: F401
+from app.models import Base, Event, IdempotencyKey, MetadataModel, OutboxEvent, Place, Ticket  # noqa: F401
 
 config = context.config
 fileConfig(config.config_file_name)

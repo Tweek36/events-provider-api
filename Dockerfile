@@ -3,9 +3,6 @@ FROM python:3.13-slim
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Set uv cache directory
-ENV UV_CACHE_DIR=/tmp/uv-cache
-
 RUN addgroup --system --gid 1000 appuser && \
     adduser --system --uid 1000 --ingroup appuser appuser
 
@@ -17,11 +14,14 @@ WORKDIR /app
 # Copy dependency files
 COPY --chown=appuser:appuser pyproject.toml uv.lock ./
 
-# Install dependencies using uv as root (to avoid permission issues)
-RUN uv sync --frozen --no-dev
-
-# Switch to appuser for all subsequent operations
+# Switch to appuser before installing dependencies
 USER appuser
+
+# Set HOME for appuser
+ENV HOME=/app
+
+# Install dependencies as appuser
+RUN uv sync --frozen --no-dev
 
 # Copy application code and start script
 COPY --chown=appuser:appuser . .

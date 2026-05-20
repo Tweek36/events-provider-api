@@ -1,11 +1,12 @@
 import uuid
 from datetime import datetime
 
+import sqlalchemy as sa
 from sqlalchemy import UUID, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.types import EventStatus, SyncStatusType
+from app.types import EventStatus, OutboxStatus, SyncStatusType
 
 
 class MetadataModel(Base):
@@ -73,3 +74,24 @@ class Ticket(Base):
     seat: Mapped[str] = mapped_column(String)
 
     event: Mapped["Event"] = relationship(back_populates="tickets")
+
+class OutboxEvent(Base):
+    __tablename__ = "outbox"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, index=True, default=uuid.uuid4)
+
+    event_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    payload: Mapped[dict] = mapped_column(type_=sa.JSON, nullable=False)
+    status: Mapped[OutboxStatus] = mapped_column(String(20), nullable=False, default=OutboxStatus.PENDING)
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.now)
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+class IdempotencyKey(Base):
+    __tablename__ = "idempotency_keys"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, index=True, default=uuid.uuid4)
+    idempotency_key: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
+    ticket_id: Mapped[uuid.UUID] = mapped_column(UUID, nullable=False)
+    request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.now, index=True)

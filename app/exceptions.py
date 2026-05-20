@@ -33,6 +33,11 @@ class TicketNotFound(Exception):
 
     pass
 
+class IdempotencyConflict(Exception):
+    """Конфликт ключа идемпотентности"""
+
+    pass
+
 
 class EventsProviderError(Exception):
     """Ошибка при обращении к внешнему API событий"""

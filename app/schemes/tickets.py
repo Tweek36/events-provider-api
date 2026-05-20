@@ -13,3 +13,8 @@ class TicketsRequestBody(BaseModel):
         description="Место в зале",
         pattern=r"^[A-Z]\d+$",
     )
+    idempotency_key: str | None = Field(
+        None,
+        description="Ключ идемпотентности для предотвращения дублирования запросов",
+        max_length=255,
+    )

@@ -16,6 +16,11 @@ class EventStatus(StrEnum):
     FINISHED = "finished"
     REGISTRATION_CLOSED = "registration_closed"
 
+class OutboxStatus(StrEnum):
+    PENDING = "pending"
+    SENT = "sent"
+    FAILED = "failed"
+
 
 class DateStr(str):
     def __new__(cls, value: str):

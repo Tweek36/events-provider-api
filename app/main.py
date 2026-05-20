@@ -1,22 +1,42 @@
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from cashews import cache
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from app.api import events, sync, tickets
 from app.config.logging import ProblematicRequestLoggingMiddleware, configure_logging
 from app.exceptions import EventsProviderError
+from app.settings import settings
+from app.workers.outbox_worker import outbox_worker
 
 configure_logging(log_level="INFO", log_file="logs/app.log")
+
+# Инициализация Sentry/GlitchTip
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.SENTRY_ENVIRONMENT,
+        traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
+        integrations=[FastApiIntegration()],
+    )
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     cache.setup("mem://")
     await cache.init()
+
+    # Запустить outbox worker
+    await outbox_worker.start()
+
     yield
+
+    # Остановить outbox worker
+    await outbox_worker.stop()
     await cache.close()
 
 
