@@ -64,11 +64,7 @@ class OutboxWorker:
                                     continue
 
                                 ticket_service = TicketsService(session)
-                                ticket = (
-                                    await ticket_service.ticket_repository.get_by_id(
-                                        ticket_id, selectin=[Event]
-                                    )
-                                )
+                                ticket = await ticket_service.ticket_repository.get_by_id(ticket_id, selectin=[Event])
 
                                 if not ticket:
                                     logger.error(
@@ -102,10 +98,7 @@ class OutboxWorker:
 
                                 except httpx.HTTPStatusError as e:
                                     # 4xx ошибки (кроме 409) - не повторять
-                                    if (
-                                        400 <= e.response.status_code < 500
-                                        and e.response.status_code != 409
-                                    ):
+                                    if 400 <= e.response.status_code < 500 and e.response.status_code != 409:
                                         logger.error(
                                             "outbox_event_client_error",
                                             event_id=str(event.id),
@@ -153,9 +146,7 @@ class OutboxWorker:
                 await asyncio.sleep(settings.OUTBOX_WORKER_INTERVAL)
 
             except Exception as e:
-                logger.error(
-                    "outbox_worker_error", error_type=type(e).__name__, error_msg=str(e)
-                )
+                logger.error("outbox_worker_error", error_type=type(e).__name__, error_msg=str(e))
                 await asyncio.sleep(settings.OUTBOX_WORKER_INTERVAL)
 
     async def start(self) -> None:

@@ -27,9 +27,7 @@ from app.types import EventStatus
 class TicketsService:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.events_provider_client = EventsProviderClient(
-            settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY
-        )
+        self.events_provider_client = EventsProviderClient(settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY)
         self.ticket_repository = TicketRepository(session)
         self.event_repository = EventRepository(session)
         self.outbox_repository = OutboxRepository(session)
@@ -38,28 +36,21 @@ class TicketsService:
     def _is_seat_available(self, seat: str, seats_pattern: str) -> bool:
         seat_row, seat_num = seat[0], int(seat[1:])
         return any(
-            seat_row == r[0]
-            and (int(r[1:].split("-")[0])) <= seat_num <= int(r[1:].split("-")[1])
+            seat_row == r[0] and (int(r[1:].split("-")[0])) <= seat_num <= int(r[1:].split("-")[1])
             for r in seats_pattern.split(",")
         )
 
     async def register(self, body: TicketsRequestBody):
         # Проверка идемпотентности
         if body.idempotency_key:
-            existing = await self.idempotency_repository.get_by_key(
-                body.idempotency_key
-            )
+            existing = await self.idempotency_repository.get_by_key(body.idempotency_key)
             if existing:
                 # Проверить, что данные запроса совпадают
                 request_data = body.model_dump(exclude={"idempotency_key"})
-                request_hash = self.idempotency_repository.compute_request_hash(
-                    request_data
-                )
+                request_hash = self.idempotency_repository.compute_request_hash(request_data)
 
                 if request_hash != existing.request_hash:
-                    raise IdempotencyConflict(
-                        "Idempotency key already used with different request data"
-                    )
+                    raise IdempotencyConflict("Idempotency key already used with different request data")
 
                 # Вернуть существующий результат
                 ticket = await self.ticket_repository.get_by_id(existing.ticket_id)
@@ -67,9 +58,7 @@ class TicketsService:
 
                 return RegisterResponse(ticket_id=ticket.id)
 
-        event = await self.event_repository.get_by_id(
-            body.event_id, selectin=[Event.place, Event.tickets]
-        )
+        event = await self.event_repository.get_by_id(body.event_id, selectin=[Event.place, Event.tickets])
         if not event or event.status != EventStatus.PUBLISHED:
             raise EventNotFound("Event not found")
         if event.registration_deadline < datetime.datetime.now(datetime.UTC):
@@ -116,9 +105,7 @@ class TicketsService:
         return response
 
     async def unregister(self, ticket_id: uuid.UUID):
-        ticket = await self.ticket_repository.get_by_id(
-            ticket_id, selectin=[Ticket.event]
-        )
+        ticket = await self.ticket_repository.get_by_id(ticket_id, selectin=[Ticket.event])
         if not ticket:
             raise TicketNotFound("Ticket not found")
         if ticket.event.event_time <= datetime.datetime.now(datetime.UTC):

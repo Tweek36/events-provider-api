@@ -16,6 +16,7 @@ class EventStatus(StrEnum):
     FINISHED = "finished"
     REGISTRATION_CLOSED = "registration_closed"
 
+
 class OutboxStatus(StrEnum):
     PENDING = "pending"
     SENT = "sent"

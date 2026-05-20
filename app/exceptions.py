@@ -33,6 +33,7 @@ class TicketNotFound(Exception):
 
     pass
 
+
 class IdempotencyConflict(Exception):
     """Конфликт ключа идемпотентности"""
 

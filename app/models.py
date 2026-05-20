@@ -75,6 +75,7 @@ class Ticket(Base):
 
     event: Mapped["Event"] = relationship(back_populates="tickets")
 
+
 class OutboxEvent(Base):
     __tablename__ = "outbox"
 
@@ -87,6 +88,7 @@ class OutboxEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.now)
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+
 class IdempotencyKey(Base):
     __tablename__ = "idempotency_keys"
 
@@ -94,4 +96,6 @@ class IdempotencyKey(Base):
     idempotency_key: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     ticket_id: Mapped[uuid.UUID] = mapped_column(UUID, nullable=False)
     request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.now, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=datetime.now, index=True
+    )

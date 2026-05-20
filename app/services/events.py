@@ -14,15 +14,11 @@ class EventsService:
     def __init__(self, session):
         self.session = session
         self.event_repository = EventRepository(session)
-        self.events_provider_client = EventsProviderClient(
-            settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY
-        )
+        self.events_provider_client = EventsProviderClient(settings.EVENTS_PROVIDER_API_URL, settings.X_API_KEY)
         self.hostname = settings.HOSTNAME
 
     async def events(self, date_from: str, page: int, page_size: int):
-        count = await self.event_repository.count(
-            datetime.strptime(date_from, "%Y-%m-%d")
-        )
+        count = await self.event_repository.count(datetime.strptime(date_from, "%Y-%m-%d"))
         results = await self.event_repository.get_all(
             date_from=datetime.strptime(date_from, "%Y-%m-%d"),
             skip=(page - 1) * page_size,

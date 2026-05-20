@@ -40,9 +40,7 @@ class IdempotencyRepository(BaseRepository[IdempotencyKey]):
         Returns:
             Optional[IdempotencyKey]: Запись или None
         """
-        stmt = select(IdempotencyKey).where(
-            IdempotencyKey.idempotency_key == idempotency_key
-        )
+        stmt = select(IdempotencyKey).where(IdempotencyKey.idempotency_key == idempotency_key)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 

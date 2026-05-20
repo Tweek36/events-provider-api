@@ -5,6 +5,7 @@ Revises: 7ce77e7cf2aa
 Create Date: 2026-05-20 11:18:11.250808
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -13,10 +14,11 @@ import sqlalchemy.dialects.postgresql as pg
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = 'c4b7082b2954'
-down_revision: str | Sequence[str] | None = '7ce77e7cf2aa'
+revision: str = "c4b7082b2954"
+down_revision: str | Sequence[str] | None = "7ce77e7cf2aa"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
+
 
 def upgrade() -> None:
     """Upgrade schema."""
@@ -32,6 +34,7 @@ def upgrade() -> None:
         sa.Index("ix_idempotency_keys_idempotency_key", "idempotency_key"),
         sa.Index("ix_idempotency_keys_created_at", "created_at"),
     )
+
 
 def downgrade() -> None:
     """Downgrade schema."""

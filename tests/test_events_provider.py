@@ -130,9 +130,7 @@ class TestEventsProviderClient:
         ticket_id = uuid.uuid4()
         mock_response.json.return_value = {"ticket_id": str(ticket_id)}
 
-        register_data = RegisterRequest(
-            first_name="Ivan", last_name="Ivanov", seat="A1", email="ivan@example.com"
-        )
+        register_data = RegisterRequest(first_name="Ivan", last_name="Ivanov", seat="A1", email="ivan@example.com")
 
         with patch("httpx.AsyncClient", return_value=mock_client):
             result = await client.register(event_id, register_data)

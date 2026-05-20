@@ -5,6 +5,7 @@ import structlog
 
 logger = structlog.get_logger()
 
+
 class CapashinoClient:
     """Клиент для взаимодействия с Capashino Notification Service."""
 
@@ -12,9 +13,7 @@ class CapashinoClient:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
 
-    async def send_notification(
-        self, message: str, reference_id: str, idempotency_key: str
-    ) -> dict:
+    async def send_notification(self, message: str, reference_id: str, idempotency_key: str) -> dict:
         """
         Отправить уведомление через Capashino API.
 

@@ -25,13 +25,9 @@ class EventsProviderClient:
         self.api_key = api_key
         self.next_page_url = None
 
-    async def _request(
-        self, method: str, url: str, params: dict = None, json: dict = None
-    ) -> dict:
+    async def _request(self, method: str, url: str, params: dict = None, json: dict = None) -> dict:
         try:
-            async with httpx.AsyncClient(
-                follow_redirects=True, headers={"x-api-key": self.api_key}
-            ) as client:
+            async with httpx.AsyncClient(follow_redirects=True, headers={"x-api-key": self.api_key}) as client:
                 response = await client.request(
                     method,
                     url=url,
@@ -40,9 +36,7 @@ class EventsProviderClient:
                 )
                 if response.status_code >= 400:
                     detail = (
-                        response.json()
-                        if response.headers.get("content-type") == "application/json"
-                        else response.text
+                        response.json() if response.headers.get("content-type") == "application/json" else response.text
                     )
                     raise EventsProviderError(
                         status_code=response.status_code,
@@ -71,9 +65,7 @@ class EventsProviderClient:
         response = await self._request("GET", url)
         return SeatsResponse(**response)
 
-    async def register(
-        self, event_id: uuid.UUID, body: RegisterRequest
-    ) -> RegisterResponse:
+    async def register(self, event_id: uuid.UUID, body: RegisterRequest) -> RegisterResponse:
         url = urljoin(self.base_url, f"api/events/{event_id}/register/")
         response = await self._request(
             "POST",
@@ -82,9 +74,7 @@ class EventsProviderClient:
         )
         return RegisterResponse(**response)
 
-    async def unregister(
-        self, event_id: uuid.UUID, body: UnregisterRequest
-    ) -> UnregisterResponse:
+    async def unregister(self, event_id: uuid.UUID, body: UnregisterRequest) -> UnregisterResponse:
         url = urljoin(self.base_url, f"api/events/{event_id}/unregister/")
         response = await self._request(
             "DELETE",
