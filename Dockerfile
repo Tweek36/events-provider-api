@@ -1,8 +1,5 @@
 FROM python:3.13-slim
 
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
 RUN addgroup --system --gid 1000 appuser && \
     adduser --system --uid 1000 --ingroup appuser appuser
 
@@ -12,7 +9,7 @@ RUN mkdir -p /app && chown appuser:appuser /app
 WORKDIR /app
 
 # Copy dependency files
-COPY --chown=appuser:appuser pyproject.toml uv.lock ./
+COPY --chown=appuser:appuser requirements.txt ./
 
 # Switch to appuser before installing dependencies
 USER appuser
@@ -21,7 +18,8 @@ USER appuser
 ENV HOME=/app
 
 # Install dependencies as appuser and create venv in /app/.venv
-RUN uv sync --frozen --no-dev
+RUN python -m venv /app/.venv && \
+    /app/.venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Ensure the virtual environment is in the expected location
 ENV PATH="/app/.venv/bin:$PATH"
