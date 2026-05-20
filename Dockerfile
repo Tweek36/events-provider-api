@@ -20,8 +20,11 @@ USER appuser
 # Set HOME for appuser
 ENV HOME=/app
 
-# Install dependencies as appuser
+# Install dependencies as appuser and create venv in /app/.venv
 RUN uv sync --frozen --no-dev
+
+# Ensure the virtual environment is in the expected location
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy application code and start script
 COPY --chown=appuser:appuser . .
