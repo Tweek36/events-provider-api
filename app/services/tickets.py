@@ -18,7 +18,7 @@ from app.repositories.event import EventRepository
 from app.repositories.idempotency import IdempotencyRepository
 from app.repositories.outbox import OutboxRepository
 from app.repositories.ticket import TicketRepository
-from app.schemes.client import RegisterRequest, UnregisterRequest
+from app.schemes.client import RegisterRequest, RegisterResponse, UnregisterRequest
 from app.schemes.tickets import TicketsRequestBody
 from app.settings import settings
 from app.types import EventStatus
@@ -54,8 +54,6 @@ class TicketsService:
 
                 # Вернуть существующий результат
                 ticket = await self.ticket_repository.get_by_id(existing.ticket_id)
-                from app.schemes.client import RegisterResponse
-
                 return RegisterResponse(ticket_id=ticket.id)
 
         event = await self.event_repository.get_by_id(body.event_id, selectin=[Event.place, Event.tickets])

@@ -272,6 +272,25 @@ class TestEventsProviderClient:
         assert results[1].results[0].name == "Event 2"
 
     @pytest.mark.asyncio
+    async def test_fetch_events_empty_response(self, client, mock_httpx_client):
+        """Тест fetch_events для пустого ответа (results: [], next: null)."""
+        mock_client, mock_response = mock_httpx_client
+        mock_response.json.return_value = {
+            "next": None,
+            "previous": None,
+            "results": [],
+        }
+
+        with patch("httpx.AsyncClient", return_value=mock_client):
+            results = []
+            async for response in client.fetch_events("2026-05-01"):
+                results.append(response)
+
+        assert len(results) == 1
+        assert isinstance(results[0], EventsResponse)
+        assert len(results[0].results) == 0
+
+    @pytest.mark.asyncio
     async def test_request_logging_on_exception(self, client, mock_httpx_client):
         """Тест логирования при исключениях в _request."""
         mock_client, mock_response = mock_httpx_client

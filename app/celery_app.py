@@ -1,3 +1,4 @@
+import logging
 from urllib.parse import urljoin
 
 import requests
@@ -5,6 +6,8 @@ from celery import Celery
 from celery.schedules import crontab
 
 from app.settings import settings
+
+logger = logging.getLogger(__name__)
 
 celery_app = Celery(
     "worker",
@@ -24,8 +27,8 @@ celery_app.conf.beat_schedule = {
 def daily_sync():
     try:
         response = requests.post(urljoin(f"http://{settings.HOSTNAME}/", "api/sync/trigger"))
-        print(f"Sync status: {response.status_code}")
+        logger.info("Sync status: %s", response.status_code)
         return response.json()
     except Exception as e:
-        print(f"Sync failed: {e}")
+        logger.error("Sync failed: %s", e)
         raise e

@@ -39,7 +39,7 @@ class CeleryWorker:
                 argv=["worker", "--loglevel=info", "--pool=solo"],
             )
         except Exception as e:
-            logger.error(f"Celery worker error: {e}")
+            logger.error("Celery worker error: %s", e)
 
     async def _run_beat(self):
         """Запуск Celery beat"""
@@ -47,7 +47,7 @@ class CeleryWorker:
             # Запускаем beat в отдельном потоке
             await asyncio.to_thread(self.celery_app.start, argv=["beat", "--loglevel=info"])
         except Exception as e:
-            logger.error(f"Celery beat error: {e}")
+            logger.error("Celery beat error: %s", e)
 
     async def stop(self):
         """Остановка Celery worker и beat"""
