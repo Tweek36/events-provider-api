@@ -39,9 +39,9 @@ async def _tracked_get(key, default=None):
     return result
 
 
-async def _tracked_set(key, value, expire=None):
+async def _tracked_set(key, value, expire=None, **kwargs):
     """Обёртка для cache.set."""
-    return await _original_set(key, value, expire)
+    return await _original_set(key, value, expire, **kwargs)
 
 
 # Применяем патчи
