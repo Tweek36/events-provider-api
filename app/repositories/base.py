@@ -25,6 +25,16 @@ class BaseRepository[ModelType]:
         await self.session.refresh(db_obj)
         return db_obj
 
+    async def update(self, id: Any, update_data: dict) -> ModelType | None:
+        obj = await self.get_by_id(id)
+        if not obj:
+            return None
+        for key, value in update_data.items():
+            setattr(obj, key, value)
+        await self.session.flush()
+        await self.session.refresh(obj)
+        return obj
+
     async def delete(self, id: Any) -> bool:
         obj = await self.get_by_id(id)
         if not obj:
