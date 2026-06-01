@@ -28,3 +28,8 @@ class EventRepository(BaseRepository[Event]):
             select(func.count()).select_from(Event).where(Event.event_time >= date_from)
         )
         return result.scalar_one()
+
+    async def count_all(self) -> int:
+        """Подсчитать общее количество событий в БД."""
+        result = await self.session.execute(select(func.count()).select_from(Event))
+        return result.scalar_one()

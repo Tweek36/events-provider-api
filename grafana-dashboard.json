@@ -1,0 +1,202 @@
+{
+  "dashboard": {
+    "title": "Events Provider API Metrics",
+    "tags": ["events-provider", "prometheus"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Requests per minute (RPM)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "sum by (pod) (rate(http_requests_total[5m])) * 60",
+            "legendFormat": "{{pod}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"label": "req/min", "show": true},
+          {"show": true}
+        ],
+        "xaxis": {"show": true},
+        "lines": true,
+        "fill": 1,
+        "linewidth": 2,
+        "pointradius": 5,
+        "legend": {"show": true, "values": false, "alignAsTable": false}
+      },
+      {
+        "id": 2,
+        "title": "Latency p95",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum by (pod, le) (rate(http_request_duration_seconds_bucket[5m])))",
+            "legendFormat": "{{pod}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"label": "seconds", "show": true, "format": "s"},
+          {"show": true}
+        ],
+        "xaxis": {"show": true},
+        "lines": true,
+        "fill": 1,
+        "linewidth": 2,
+        "pointradius": 5,
+        "legend": {"show": true, "values": false, "alignAsTable": false}
+      },
+      {
+        "id": 3,
+        "title": "Error rate (%)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "sum by (pod) (rate(http_requests_total{status=~\"5..\"}[5m])) / sum by (pod) (rate(http_requests_total[5m])) * 100",
+            "legendFormat": "{{pod}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"label": "%", "show": true, "min": 0, "max": 100},
+          {"show": true}
+        ],
+        "xaxis": {"show": true},
+        "lines": true,
+        "fill": 1,
+        "linewidth": 2,
+        "pointradius": 5,
+        "legend": {"show": true, "values": false, "alignAsTable": false}
+      },
+      {
+        "id": 4,
+        "title": "Билеты",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "max(tickets_created_total)",
+            "legendFormat": "Созданные",
+            "refId": "A"
+          },
+          {
+            "expr": "max(tickets_cancelled_total)",
+            "legendFormat": "Отменённые",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"label": "count", "show": true, "min": 0},
+          {"show": true}
+        ],
+        "xaxis": {"show": true},
+        "lines": true,
+        "fill": 1,
+        "linewidth": 2,
+        "pointradius": 5,
+        "legend": {"show": true, "values": false, "alignAsTable": false}
+      },
+      {
+        "id": 5,
+        "title": "События",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "max(events_total)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Events Provider RPM",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 6, "y": 16},
+        "targets": [
+          {
+            "expr": "sum by (pod) (rate(events_provider_requests_total[5m])) * 60",
+            "legendFormat": "{{pod}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"label": "req/min", "show": true},
+          {"show": true}
+        ],
+        "xaxis": {"show": true},
+        "lines": true,
+        "fill": 1,
+        "linewidth": 2,
+        "pointradius": 5,
+        "legend": {"show": true, "values": false, "alignAsTable": false}
+      },
+      {
+        "id": 7,
+        "title": "Events Provider latency p95",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum by (pod, le) (rate(events_provider_request_duration_seconds_bucket[5m])))",
+            "legendFormat": "{{pod}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"label": "seconds", "show": true, "format": "s"},
+          {"show": true}
+        ],
+        "xaxis": {"show": true},
+        "lines": true,
+        "fill": 1,
+        "linewidth": 2,
+        "pointradius": 5,
+        "legend": {"show": true, "values": false, "alignAsTable": false}
+      },
+      {
+        "id": 8,
+        "title": "Cache hit rate (%)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "sum by (pod) (rate(cache_hits_total[5m])) / (sum by (pod) (rate(cache_hits_total[5m])) + sum by (pod) (rate(cache_misses_total[5m]))) * 100",
+            "legendFormat": "{{pod}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"label": "%", "show": true, "min": 0, "max": 100},
+          {"show": true}
+        ],
+        "xaxis": {"show": true},
+        "lines": true,
+        "fill": 1,
+        "linewidth": 2,
+        "pointradius": 5,
+        "legend": {"show": true, "values": false, "alignAsTable": false}
+      }
+    ]
+  }
+}

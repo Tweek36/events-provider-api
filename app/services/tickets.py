@@ -21,7 +21,7 @@ from app.repositories.ticket import TicketRepository
 from app.schemes.client import RegisterRequest, RegisterResponse, UnregisterRequest
 from app.schemes.tickets import TicketsRequestBody
 from app.settings import settings
-from app.types import EventStatus
+from app.types import EventStatus, TicketStatus
 
 
 class TicketsService:
@@ -63,7 +63,7 @@ class TicketsService:
             raise RegistrationClosed("Registration deadline has passed")
         if not self._is_seat_available(body.seat, event.place.seats_pattern):
             raise SeatUnavailable("Seat is not available")
-        if event.tickets and any(t.seat == body.seat for t in event.tickets):
+        if event.tickets and any(t.seat == body.seat and t.status == TicketStatus.ACTIVE for t in event.tickets):
             raise SeatAlreadyTaken("Seat is already taken")
 
         response = await self.events_provider_client.register(
@@ -106,10 +106,12 @@ class TicketsService:
         ticket = await self.ticket_repository.get_by_id(ticket_id, selectin=[Ticket.event])
         if not ticket:
             raise TicketNotFound("Ticket not found")
+        if ticket.status == TicketStatus.CANCELLED:
+            raise TicketNotFound("Ticket already cancelled")
         if ticket.event.event_time <= datetime.datetime.now(datetime.UTC):
             raise EventAlreadyOccurred("Event has already occurred")
         response = await self.events_provider_client.unregister(
             event_id=ticket.event_id, body=UnregisterRequest(ticket_id=ticket_id)
         )
-        await self.ticket_repository.delete(ticket_id)
+        await self.ticket_repository.update(ticket_id, {"status": TicketStatus.CANCELLED})
         return response

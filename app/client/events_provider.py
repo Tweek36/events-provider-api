@@ -1,3 +1,4 @@
+import time
 import uuid
 from collections.abc import AsyncGenerator
 from urllib.parse import parse_qs, urljoin, urlparse, urlunparse
@@ -6,6 +7,7 @@ import httpx
 import structlog
 
 from app.exceptions import EventsProviderError
+from app.metrics import events_provider_request_duration_seconds, events_provider_requests_total
 from app.schemes.client import (
     EventsResponse,
     RegisterRequest,
@@ -26,6 +28,12 @@ class EventsProviderClient:
         self.next_page_url = None
 
     async def _request(self, method: str, url: str, params: dict = None, json: dict = None) -> dict:
+        # Определяем endpoint для метрик (последняя часть пути)
+        endpoint = url.rstrip("/").split("/")[-1] if "/" in url else url
+
+        start_time = time.monotonic()
+        status_code = None
+
         try:
             async with httpx.AsyncClient(follow_redirects=True, headers={"x-api-key": self.api_key}) as client:
                 response = await client.request(
@@ -34,6 +42,8 @@ class EventsProviderClient:
                     params=params,
                     json=json,
                 )
+                status_code = response.status_code
+
                 if response.status_code >= 400:
                     detail = (
                         response.json() if response.headers.get("content-type") == "application/json" else response.text
@@ -44,6 +54,10 @@ class EventsProviderClient:
                     )
                 return response.json()
         except Exception as e:
+            # Если статус не был установлен, значит произошла ошибка до получения ответа
+            if status_code is None:
+                status_code = 0  # Используем 0 для сетевых ошибок
+
             logger.error(
                 "event_provider_request_failed",
                 error_type=type(e).__name__,
@@ -53,6 +67,19 @@ class EventsProviderClient:
                 params=params,
             )
             raise e
+        finally:
+            # Собираем метрики в любом случае
+            if status_code is not None:
+                duration = time.monotonic() - start_time
+
+                events_provider_requests_total.labels(
+                    endpoint=endpoint,
+                    status=status_code,
+                ).inc()
+
+                events_provider_request_duration_seconds.labels(
+                    endpoint=endpoint,
+                ).observe(duration)
 
     async def events(self, changed_at: str) -> EventsResponse:
         validate_date_format(changed_at)

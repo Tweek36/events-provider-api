@@ -23,6 +23,11 @@ class OutboxStatus(StrEnum):
     FAILED = "failed"
 
 
+class TicketStatus(StrEnum):
+    ACTIVE = "active"
+    CANCELLED = "cancelled"
+
+
 class DateStr(str):
     def __new__(cls, value: str):
         if not re.match(r"^\d{4}-\d{2}-\d{2}$", value):

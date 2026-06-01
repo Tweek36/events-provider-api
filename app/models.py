@@ -6,7 +6,7 @@ from sqlalchemy import UUID, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.types import EventStatus, OutboxStatus, SyncStatusType
+from app.types import EventStatus, OutboxStatus, SyncStatusType, TicketStatus
 
 
 class MetadataModel(Base):
@@ -72,6 +72,7 @@ class Ticket(Base):
 
     event_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("events.id", ondelete="CASCADE"), index=True)
     seat: Mapped[str] = mapped_column(String)
+    status: Mapped[TicketStatus] = mapped_column(String, server_default=TicketStatus.ACTIVE, nullable=False)
 
     event: Mapped["Event"] = relationship(back_populates="tickets")
 
